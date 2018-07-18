@@ -1,0 +1,2 @@
+# SNSB
+ServiceNow Scripting Bridge
