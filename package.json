@@ -1,0 +1,54 @@
+{
+    "name": "snsb",
+    "displayName": "ServiceNow Script Bridge",
+    "description": "Work with service now scripts in a real ide.",
+    "version": "0.0.1",
+    "publisher": "ambs",
+    "engines": {
+        "vscode": "^1.21.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:snsb.connect",
+        "onCommand:snsb.getInclude"
+    ],
+    "main": "./out/extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "snsb.connect",
+                "title": "Connect to ServiceNow",
+                "category": "snsb"
+            },
+            {
+                "command": "snsb.getInclude",
+                "title": "Get Script Include",
+                "category": "snsb"
+            },
+            {
+                "command": "snsb.clearWorkState",
+                "title": "clear workstate",
+                "category": "snsb"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.6",
+        "tslint": "^5.8.0",
+        "@types/node": "^7.0.43",
+        "@types/mocha": "^2.2.42"
+    },
+    "dependencies": {
+        "axios": "^0.18.0"
+    }
+}
