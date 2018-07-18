@@ -129,6 +129,51 @@ export namespace ServiceNow
             }
         }
 
+        /**
+         * GetScriptInclude
+         */
+        public GetScriptInclude(textDocument: vscode.TextDocument)//: ServiceNow.ScriptInclude | undefined
+        {
+            let record = this.GetRecord(textDocument);
+
+            console.log(record);
+
+            //convert to script include
+        }
+
+        private GetParentPath(Uri: vscode.Uri): string
+        {
+            let nameLength = this.GetFileName(Uri).length;
+            return Uri.fsPath.substring(0, Uri.fsPath.length - nameLength - 1);
+        }
+
+        private GetFileName(Uri: vscode.Uri): string
+        {
+            let split = Uri.fsPath.split('\\');
+            return split[split.length - 1];
+        }
+        //returns a record from textdocument.
+        private GetRecord(textDocument: vscode.TextDocument): ServiceNow.Record | undefined
+        {
+            try
+            {
+                let parentPath = this.GetParentPath(textDocument.uri);
+
+                let recordName = this.GetFileName(textDocument.uri);
+                let optionsPath = `${parentPath}\\${recordName.split('.')[0]}.options.json`;
+
+                let content = fileSystem.readFileSync(optionsPath, "utf8");
+
+                let deserialized = JSON.parse(content);
+
+                return new ServiceNow.Record(deserialized);
+            }
+            catch (e)
+            {
+                console.error(e);
+            }
+        }
+
         private GetPathInstance(i: Instance): string | undefined
         {
             let workspaceRoot = this.GetWorkspaceFolder();
@@ -443,14 +488,6 @@ export namespace ServiceNow
         }
 
         /**
-         * GetScriptInclude gets and loads a single Include
-         */
-        public GetScriptInclude(name: string): void
-        {
-            throw new Error("not implemented");
-        }
-
-        /**
          * ListScriptIncludes lists all available script includes
          */
         public ListScriptIncludes(): Axios.AxiosPromise | undefined
@@ -489,6 +526,17 @@ export namespace ServiceNow
             this._link = o.link;
             this._display_value = o.display_value;
         }
+
+        /**
+         * toJSON
+         */
+        public toJSON()
+        {
+            return {
+                link: this._link,
+                display_value: this._display_value
+            };
+        }
     }
 
 
@@ -505,10 +553,11 @@ export namespace ServiceNow
     }
 
     //class with base attributes of any record in ServiceNow.
-    class Record implements IsysRecord
+    export class Record implements IsysRecord
     {
         constructor(o: IsysRecord)
         {
+            //todo Fix propertynames in JSON serialization.
             this._sys_class_name = o.sys_class_name;
             this._sys_id = o.sys_id;
             this._sys_policy = o.sys_policy;
@@ -559,6 +608,22 @@ export namespace ServiceNow
         {
             return this._sys_scope;
         }
+
+        /**
+         * toJSON
+         */
+        public toJSON()
+        {
+            return {
+                sys_class_name: this._sys_class_name,
+                sys_id: this._sys_id,
+                sys_policy: this._sys_policy,
+                sys_updated_on: this._sys_updated_on,
+                sys_created_on: this._sys_created_on,
+                sys_package: this._sys_package,
+                sys_scope: this._sys_scope
+            };
+        }
     }
 
     interface IsysScriptInclude extends IsysRecord
@@ -572,7 +637,7 @@ export namespace ServiceNow
         name: string;
     }
 
-    class ScriptInclude extends Record implements IsysScriptInclude, vscode.QuickPickItem
+    export class ScriptInclude extends Record implements IsysScriptInclude, vscode.QuickPickItem
     {
         constructor(si: IsysScriptInclude)
         {
@@ -660,6 +725,30 @@ export namespace ServiceNow
         public set name(v: string)
         {
             this._name = v;
+        }
+
+        /**
+         * toJSON
+         */
+        public toJSON()
+        {
+            let b = super.toJSON();
+            return {
+                sys_class_name: b.sys_class_name,
+                sys_id: b.sys_id,
+                sys_policy: b.sys_policy,
+                sys_updated_on: b.sys_updated_on,
+                sys_created_on: b.sys_created_on,
+                sys_package: b.sys_package,
+                sys_scope: b.sys_scope,
+                client_callable: this._client_callable,
+                access: this._access,
+                active: this._active,
+                description: this._description,
+                script: this._script,
+                api_name: this._api_name,
+                name: this._name
+            };
         }
     }
 

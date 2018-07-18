@@ -19,10 +19,7 @@ export function activate(context: vscode.ExtensionContext)
         instance = new ServiceNow.Instance();
     }
 
-    //todo convert Instance to be global
     //no need for reinstatiation on each call. would also make it easier to store already retrieved entites. 
-
-
     console.info("SNSB Plugin Activated");
 
     //Configure instance object
@@ -137,9 +134,17 @@ export function activate(context: vscode.ExtensionContext)
         wsm.ClearState();
     });
 
+    //onsave
+
+    var listenerOnDidSave = vscode.workspace.onDidSaveTextDocument((e) =>
+    {
+        wm.GetScriptInclude(e);
+    });
+
     context.subscriptions.push(connect);
     context.subscriptions.push(GetInclude);
     context.subscriptions.push(clearWorkState);
+    context.subscriptions.push(listenerOnDidSave);
 }
 // this method is called when your extension is deactivated
 export function deactivate(context: vscode.ExtensionContext)
