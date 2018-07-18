@@ -14,6 +14,79 @@ export namespace ServiceNow
         password
     }
 
+    //get update and manage workpace state.
+    export class WorkspaceStateManager
+    {
+        //todo add get and update functions.
+        constructor(context: vscode.ExtensionContext)
+        {
+            this._context = context;
+        }
+        private _context: vscode.ExtensionContext;
+
+        /**
+         * ClearState, sets all stateKeys to undefined
+         */
+        public ClearState()
+        {
+            for (const key in StateKeys)
+            {
+                if (StateKeys.hasOwnProperty(key))
+                {
+                    const element = StateKeys[key];
+                    this._context.workspaceState.update(element.toString(), undefined);
+                }
+            }
+        }
+
+        /**
+         * ClearSensitive clears sensitive data from workspace state
+         */
+        public ClearSensitive(): void
+        {
+            this._context.workspaceState.update(ServiceNow.StateKeys.password.toString(), new Object());
+        }
+
+        /**
+         * HasInstanceInState
+         */
+        public HasInstanceInState(): boolean
+        {
+            if (this.GetUrl() && this.GetUserName())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /**
+         * GetInstance get Url from state
+         */
+        public GetUrl(): string | undefined
+        {
+            return this._context.workspaceState.get(ServiceNow.StateKeys.url.toString()) as string;
+        }
+
+        /**
+         * GetUserName get username from state
+         */
+        public GetUserName(): string | undefined
+        {
+            return this._context.workspaceState.get(ServiceNow.StateKeys.user.toString()) as string;
+        }
+
+        /**
+         * GetPassword retrieves password from state. 
+         */
+        public GetPassword(): string | undefined
+        {
+            return this._context.workspaceState.get(ServiceNow.StateKeys.password.toString()) as string;
+        }
+    }
+
     export class WorkspaceManager
     {
         constructor()
@@ -44,17 +117,14 @@ export namespace ServiceNow
 
             if (instancePath)
             {
-                //todo Create folder scriptinclude
                 let includedir = `${instancePath}\\ScriptInclude`;
                 this.CreateFolder(includedir);
 
                 let MetaDir = `${includedir}\\${record.name}`;
                 this.CreateFolder(MetaDir);
 
-                //todo Create Metadatasysfile
                 this.CreateFile(`${MetaDir}\\${record.name}.options.json`, JSON.stringify(record));
 
-                //todo Create Script file.
                 this.CreateFile(`${MetaDir}\\${record.name}.script.js`, record.script);
             }
         }
@@ -63,7 +133,7 @@ export namespace ServiceNow
         {
             let workspaceRoot = this.GetWorkspaceFolder();
 
-            if (workspaceRoot)
+            if (workspaceRoot && i.Url)
             {
                 let path = `${workspaceRoot.uri.fsPath}\\${i.Url.host}`;
                 return path;
@@ -120,7 +190,7 @@ export namespace ServiceNow
             try
             {
                 fileSystem.readdirSync(path);
-                console.error(`Folder Already Exist: ${path}`);
+                console.warn(`Folder Already Exist: ${path}`);
                 return true;
             }
             //throws if no folder by that name exist
@@ -144,7 +214,7 @@ export namespace ServiceNow
             try
             {
                 fileSystem.readFileSync(path);
-                console.error(`File Already Exist: ${path}`);
+                console.warn(`File Already Exist: ${path}`);
                 return true;
             }
             catch (error)
@@ -161,24 +231,42 @@ export namespace ServiceNow
     //Instantiate to reset credentials
     export class Instance
     {
-        private _userName: string;
-        public get UserName(): string
+        constructor(Url?: URL, UserName?: string, Password?: string)
         {
-            return this._userName;
+            if (Url && UserName && Password)
+            {
+                this.Initialize(Url, UserName, Password);
+            }
         }
 
-        private _url: URL;
-        public get Url(): URL
+
+        private _userName: string | undefined;
+        public get UserName(): string | undefined
         {
-            return this._url;
+            if (this.IsInitialized())
+            {
+                return this._userName;
+            }
         }
 
-        private _ApiProxy: ServiceNow.Api;
-        public get ApiProxy(): ServiceNow.Api
+        private _url: URL | undefined;
+        public get Url(): URL | undefined
         {
-            return this._ApiProxy;
+            if (this.IsInitialized())
+            {
+                return this._url;
+            }
         }
-        public set ApiProxy(v: ServiceNow.Api)
+
+        private _ApiProxy: ServiceNow.Api | undefined;
+        public get ApiProxy(): ServiceNow.Api | undefined
+        {
+            if (this.IsInitialized())
+            {
+                return this._ApiProxy;
+            }
+        }
+        public set ApiProxy(v: ServiceNow.Api | undefined)
         {
             this._ApiProxy = v;
         }
@@ -197,7 +285,25 @@ export namespace ServiceNow
             return this._hasRequiredRole;
         }
 
-        constructor(Url: URL, UserName: string, Password: string)
+        /**
+                 * IsInitialized
+                 */
+        public IsInitialized(): boolean
+        {
+            if (this._url && this._userName)
+            {
+                return true;
+            }
+            else
+            {
+                console.warn("Instance not initalized");
+                return false;
+            }
+        }
+        /**
+         * Initialize
+         */
+        public Initialize(Url: URL, UserName: string, Password: string): void
         {
             this._url = Url;
             this._userName = UserName;
@@ -205,6 +311,7 @@ export namespace ServiceNow
             this._ApiProxy = new ServiceNow.Api(this, Password);
             this.TestConnection();
         }
+
 
         /**
          * TestConnection
@@ -215,22 +322,29 @@ export namespace ServiceNow
             this._hasRequiredRole = false;
             this._isPasswordValid = false;
             // todo move logic to api proxy class
-            this.ApiProxy.GetUser(this.UserName).then((res) =>
+            if (this.ApiProxy && this.UserName)
             {
-                if (res.data.result.length === 1)
+                let promise = this.ApiProxy.GetUser(this.UserName);
+                if (promise)
                 {
-                    vscode.window.showInformationMessage("Connected");
-                    this._isPasswordValid = true;
+                    promise.then((res) =>
+                    {
+                        if (res.data.result.length === 1)
+                        {
+                            vscode.window.showInformationMessage("Connected");
+                            this._isPasswordValid = true;
+                        }
+                        else
+                        {
+                            throw new Error("Connection failed");
+                        }
+                    }).catch((res) =>
+                    {
+                        vscode.window.showErrorMessage(res.message);
+                        throw res;
+                    });
                 }
-                else
-                {
-                    throw new Error("Connection failed");
-                }
-            }).catch((res) =>
-            {
-                vscode.window.showErrorMessage(res.message);
-                throw res;
-            });
+            }
         }
 
         /**
@@ -248,27 +362,33 @@ export namespace ServiceNow
         {
             return new Promise((resolve, reject) =>
             {
-                var availableIncludes = this.ApiProxy.ListScriptIncludes();
-
-                let result = new Array<ScriptInclude>();
-                availableIncludes.then((res) =>
+                if (this.ApiProxy)
                 {
-                    if (res.data.result.length > 0)
-                    {
-                        res.data.result.forEach((element: IsysScriptInclude) =>
-                        {
-                            result.push(new ScriptInclude(element));
-                        });
-                        resolve(result);
-                    }
-                    else
-                    {
-                        reject("No elements Found");
-                    }
-                });
-            });
-        }
+                    var availableIncludes = this.ApiProxy.ListScriptIncludes();
 
+                    if (availableIncludes)
+                    {
+                        let result = new Array<ScriptInclude>();
+                        availableIncludes.then((res) =>
+                        {
+                            if (res.data.result.length > 0)
+                            {
+                                res.data.result.forEach((element: IsysScriptInclude) =>
+                                {
+                                    result.push(new ScriptInclude(element));
+                                });
+                                resolve(result);
+                            }
+                            else
+                            {
+                                reject("No elements Found");
+                            }
+                        });
+                    }
+                }
+            });
+
+        }
     }
 
     export class Api
@@ -278,12 +398,13 @@ export namespace ServiceNow
         private _SNUserTable: string = `${this._SNTableSuffix}/sys_user`;
         private _SNScriptIncludeTable: string = `${this._SNTableSuffix}/sys_script_include`;
 
-        private _HttpClient: Axios.AxiosInstance;
-        public get HttpClient(): Axios.AxiosInstance
+        private _HttpClient: Axios.AxiosInstance | undefined;
+        public get HttpClient(): Axios.AxiosInstance | undefined
         {
+            // todo this guy is missing!!!
             return this._HttpClient;
         }
-        public set HttpClient(v: Axios.AxiosInstance)
+        public set HttpClient(v: Axios.AxiosInstance | undefined)
         {
             this._HttpClient = v;
         }
@@ -293,28 +414,32 @@ export namespace ServiceNow
          */
         constructor(Instance: Instance, Password: string)
         {
-            //todo check and remove possible //
-            let fullUrl = Instance.Url.href + this._SNApiEndpoint;
+            if (Instance.Url && Instance.UserName)
+            {
+                let fullUrl = Instance.Url.href + this._SNApiEndpoint;
 
-            this._HttpClient = Axios.default.create({
-                baseURL: fullUrl,
-                timeout: 30000,
-                auth: {
-                    username: Instance.UserName,
-                    password: Password
-                }
-            });
+                this._HttpClient = Axios.default.create({
+                    baseURL: fullUrl,
+                    timeout: 30000,
+                    auth: {
+                        username: Instance.UserName,
+                        password: Password
+                    }
+                });
+            }
         }
 
         /**
          * GetUser
          * Returns a deserialized json object form the sys_user rest api. 
          */
-        public GetUser(Username: string)
+        public GetUser(Username: string): Axios.AxiosPromise | undefined
         {
-            let httpclient = this.HttpClient;
-            let url = `${this._SNUserTable}?sysparm_limit=1&user_name=${Username}&sysparm_display_value=true`;
-            return httpclient.get(url);
+            if (this.HttpClient)
+            {
+                let url = `${this._SNUserTable}?sysparm_limit=1&user_name=${Username}&sysparm_display_value=true`;
+                return this.HttpClient.get(url);
+            }
         }
 
         /**
@@ -322,20 +447,19 @@ export namespace ServiceNow
          */
         public GetScriptInclude(name: string): void
         {
-
+            throw new Error("not implemented");
         }
-
 
         /**
          * ListScriptIncludes lists all available script includes
          */
-        public ListScriptIncludes(): Axios.AxiosPromise
+        public ListScriptIncludes(): Axios.AxiosPromise | undefined
         {
-
-            let url = `${this._SNScriptIncludeTable}?sys_policy=""&sysparm_display_value=true`;
-            return this._HttpClient.get(url);
-
-
+            if (this.HttpClient)
+            {
+                let url = `${this._SNScriptIncludeTable}?sys_policy=""&sysparm_display_value=true`;
+                return this.HttpClient.get(url);
+            }
         }
     }
 

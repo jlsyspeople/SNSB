@@ -28,7 +28,7 @@
                 "category": "snsb"
             },
             {
-                "command": "snsb.clearWorkState",
+                "command": "snsb.clearWorkSpaceState",
                 "title": "clear workstate",
                 "category": "snsb"
             }

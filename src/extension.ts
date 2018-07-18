@@ -11,7 +11,15 @@ import { ServiceNow } from './class/ServiceNow';
 export function activate(context: vscode.ExtensionContext)
 {
     const wm = new ServiceNow.WorkspaceManager();
-    //todo convert Instance to constant
+    const wsm = new ServiceNow.WorkspaceStateManager(context);
+
+    let instance: ServiceNow.Instance;
+    if (wsm.HasInstanceInState)
+    {
+        instance = new ServiceNow.Instance();
+    }
+
+    //todo convert Instance to be global
     //no need for reinstatiation on each call. would also make it easier to store already retrieved entites. 
 
 
@@ -24,11 +32,7 @@ export function activate(context: vscode.ExtensionContext)
     {
         let option = new Object() as vscode.InputBoxOptions;
 
-        //if cached only prompt for password and reinstantiate
-        let urlFromState = context.workspaceState.get(ServiceNow.StateKeys.url.toString());
-        let usrFromState = context.workspaceState.get(ServiceNow.StateKeys.user.toString());
-
-        if (urlFromState !== undefined && usrFromState !== undefined)
+        if (wsm.HasInstanceInState())
         {
             option.prompt = "Enter Password";
             let promisePassword = vscode.window.showInputBox(option);
@@ -37,7 +41,13 @@ export function activate(context: vscode.ExtensionContext)
             {
                 if (res !== undefined)
                 {
-                    context.workspaceState.update(ServiceNow.StateKeys.password.toString(), res);
+                    let url = wsm.GetUrl();
+                    let usr = wsm.GetUserName();
+                    if (url && usr)
+                    {
+                        instance.Initialize(new URL(url), usr, res);
+                        context.workspaceState.update(ServiceNow.StateKeys.password.toString(), res);
+                    }
                 }
             });
         }
@@ -70,24 +80,20 @@ export function activate(context: vscode.ExtensionContext)
                                 {
                                     try
                                     {
-                                        let usr = context.workspaceState.get(ServiceNow.StateKeys.user.toString()) as string;
-                                        let url = context.workspaceState.get(ServiceNow.StateKeys.url.toString()) as string;
+                                        let usr = wsm.GetUserName();
+                                        let url = wsm.GetUrl();
                                         let pw = res;
 
                                         if (url !== undefined)
                                         {
-                                            let instance = new ServiceNow.Instance(new URL(url), usr, pw);
+                                            instance = new ServiceNow.Instance(new URL(url), usr, pw);
                                             wm.AddInstanceFolder(instance);
-
                                             context.workspaceState.update(ServiceNow.StateKeys.password.toString(), pw);
                                         }
 
                                     } catch (error)
                                     {
-                                        context.workspaceState.update(ServiceNow.StateKeys.user.toString(), undefined);
-                                        context.workspaceState.update(ServiceNow.StateKeys.url.toString(), undefined);
-                                        context.workspaceState.update(ServiceNow.StateKeys.password.toString(), undefined);
-
+                                        wsm.ClearState();
                                         vscode.window.showErrorMessage(error.message);
                                         throw error;
                                     }
@@ -100,18 +106,13 @@ export function activate(context: vscode.ExtensionContext)
         }
     });
 
-    //todo opt for include system includes
     //todo upload on save
     //todo update all command
     let GetInclude = vscode.commands.registerCommand("snsb.getInclude", () =>
     {
-        let urlFromState = context.workspaceState.get(ServiceNow.StateKeys.url.toString()) as string;
-        let usrFromState = context.workspaceState.get(ServiceNow.StateKeys.user.toString()) as string;
-        let pwFromState = context.workspaceState.get(ServiceNow.StateKeys.password.toString()) as string;
-
-        if (urlFromState !== undefined && usrFromState !== undefined && pwFromState !== undefined)
+        if (instance.IsInitialized())
         {
-            let instance = new ServiceNow.Instance(new URL(urlFromState), usrFromState, pwFromState);
+            console.log("loading includes");
             let includes = instance.ListScriptIncludes();
             includes.then((res) =>
             {
@@ -123,7 +124,6 @@ export function activate(context: vscode.ExtensionContext)
                         wm.AddScriptInclude(item, instance);
                     }
                 });
-                console.log(res.length);
             });
         }
         else
@@ -132,22 +132,18 @@ export function activate(context: vscode.ExtensionContext)
         }
     });
 
-    let clearWorkState = vscode.commands.registerCommand("snsb.clearWorkState", () =>
+    let clearWorkState = vscode.commands.registerCommand("snsb.clearWorkSpaceState", () =>
     {
-        context.workspaceState.update(ServiceNow.StateKeys.user.toString(), undefined);
-        context.workspaceState.update(ServiceNow.StateKeys.url.toString(), undefined);
-        context.workspaceState.update(ServiceNow.StateKeys.password.toString(), undefined);
+        wsm.ClearState();
     });
 
     context.subscriptions.push(connect);
     context.subscriptions.push(GetInclude);
     context.subscriptions.push(clearWorkState);
-
-
 }
 // this method is called when your extension is deactivated
 export function deactivate(context: vscode.ExtensionContext)
 {
-    //clear cached instance
-    context.workspaceState.update(ServiceNow.StateKeys.password.toString(), new Object());
+    const wsm = new ServiceNow.WorkspaceStateManager(context);
+    wsm.ClearSensitive();
 }
