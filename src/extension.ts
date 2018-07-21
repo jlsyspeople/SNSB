@@ -107,17 +107,17 @@ export function activate(context: vscode.ExtensionContext)
     //todo update all command
     let GetInclude = vscode.commands.registerCommand("snsb.getInclude", () =>
     {
+        // todo add loading indicator
         if (instance.IsInitialized())
         {
             console.log("loading includes");
-            let includes = instance.ListScriptIncludes();
+            let includes = instance.GetScriptIncludes();
             includes.then((res) =>
             {
                 vscode.window.showQuickPick(res).then((item) =>
                 {
                     if (item)
                     {
-                        console.log("i got picked: " + item.label);
                         wm.AddScriptInclude(item, instance);
                     }
                 });
@@ -134,11 +134,25 @@ export function activate(context: vscode.ExtensionContext)
         wsm.ClearState();
     });
 
-    //onsave
-
     var listenerOnDidSave = vscode.workspace.onDidSaveTextDocument((e) =>
     {
-        wm.GetScriptInclude(e);
+        let record = wm.GetRecord(e);
+
+        if (record)
+        {
+            switch (record.sys_class_name)
+            {
+                case "Script Include":
+                    let include = wm.GetScriptInclude(e);
+                    console.log(include);
+                    //todo put record
+                    break;
+                default:
+                    console.warn("Record not Recognized");
+                    break;
+            }
+        }
+
     });
 
     context.subscriptions.push(connect);

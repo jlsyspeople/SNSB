@@ -130,18 +130,35 @@ export namespace ServiceNow
         }
 
         /**
-         * GetScriptInclude
+         * GetScriptIncludew, constructs a ScriptInclude object from workspace files
          */
-        public GetScriptInclude(textDocument: vscode.TextDocument)//: ServiceNow.ScriptInclude | undefined
+        public GetScriptInclude(textDocument: vscode.TextDocument): ServiceNow.ScriptInclude | undefined
         {
             let record = this.GetRecord(textDocument);
 
-            console.log(record);
+            if (record && record.sys_class_name === "Script Include")
+            {
+                //get options
+                let serialized = this.ReadTextFile(this.GetPathRecordOptions(textDocument.uri));
 
-            //convert to script include
+                let deserialized: ScriptInclude;
+                if (serialized)
+                {
+                    deserialized = new ScriptInclude(JSON.parse(serialized));
+
+                    //get script
+                    let script = this.ReadTextFile(this.GetPathRecordScript(textDocument.uri));
+
+                    if (script)
+                    {
+                        deserialized.script = script;
+                    }
+                    return deserialized;
+                }
+            }
         }
 
-        private GetParentPath(Uri: vscode.Uri): string
+        private GetPathParent(Uri: vscode.Uri): string
         {
             let nameLength = this.GetFileName(Uri).length;
             return Uri.fsPath.substring(0, Uri.fsPath.length - nameLength - 1);
@@ -152,21 +169,54 @@ export namespace ServiceNow
             let split = Uri.fsPath.split('\\');
             return split[split.length - 1];
         }
+
         //returns a record from textdocument.
-        private GetRecord(textDocument: vscode.TextDocument): ServiceNow.Record | undefined
+        public GetRecord(textDocument: vscode.TextDocument): ServiceNow.Record | undefined
         {
             try
             {
-                let parentPath = this.GetParentPath(textDocument.uri);
+                let optionsPath = this.GetPathRecordOptions(textDocument.uri);
+                let content = this.ReadTextFile(optionsPath);
 
-                let recordName = this.GetFileName(textDocument.uri);
-                let optionsPath = `${parentPath}\\${recordName.split('.')[0]}.options.json`;
+                if (content)
+                {
+                    let deserialized = JSON.parse(content);
 
-                let content = fileSystem.readFileSync(optionsPath, "utf8");
+                    return new ServiceNow.Record(deserialized);
+                }
+            }
+            catch (e)
+            {
+                console.error(e);
+            }
+        }
 
-                let deserialized = JSON.parse(content);
+        private GetPathRecordScript(uri: vscode.Uri): string
+        {
+            let parentPath = this.GetPathParent(uri);
 
-                return new ServiceNow.Record(deserialized);
+            let recordName = this.GetFileName(uri);
+
+            return `${parentPath}\\${recordName.split('.')[0]}.script.js`;
+        }
+
+        //returns the path of hte option.json that should reside in same dir. 
+        private GetPathRecordOptions(uri: vscode.Uri): string
+        {
+            let parentPath = this.GetPathParent(uri);
+
+            let recordName = this.GetFileName(uri);
+
+            return `${parentPath}\\${recordName.split('.')[0]}.options.json`;
+        }
+
+        //read text files
+        private ReadTextFile(path: string, encoding: string = "utf8"): string | undefined
+        {
+            try
+            {
+                let content = fileSystem.readFileSync(path, "utf8");
+                return content;
             }
             catch (e)
             {
@@ -176,7 +226,7 @@ export namespace ServiceNow
 
         private GetPathInstance(i: Instance): string | undefined
         {
-            let workspaceRoot = this.GetWorkspaceFolder();
+            let workspaceRoot = this.GetPathWorkspace();
 
             if (workspaceRoot && i.Url)
             {
@@ -185,7 +235,7 @@ export namespace ServiceNow
             }
         }
 
-        private GetWorkspaceFolder(): vscode.WorkspaceFolder | undefined
+        private GetPathWorkspace(): vscode.WorkspaceFolder | undefined
         {
             if (this.HasWorkspace)
             {
@@ -276,6 +326,8 @@ export namespace ServiceNow
     //Instantiate to reset credentials
     export class Instance
     {
+        //optimize performance
+        //todo load available records on connect.
         constructor(Url?: URL, UserName?: string, Password?: string)
         {
             if (Url && UserName && Password)
@@ -366,7 +418,6 @@ export namespace ServiceNow
         {
             this._hasRequiredRole = false;
             this._isPasswordValid = false;
-            // todo move logic to api proxy class
             if (this.ApiProxy && this.UserName)
             {
                 let promise = this.ApiProxy.GetUser(this.UserName);
@@ -394,22 +445,15 @@ export namespace ServiceNow
 
         /**
          * GetScriptIncludes
+         * Returns all available script includes as an array.
          */
-        public GetScriptIncludes()
-        {
-            throw (new Error("Not implemented"));
-        }
-
-        /**
-         * ListScriptIncludes
-         */
-        public ListScriptIncludes(): Promise<Array<ScriptInclude>>
+        public GetScriptIncludes(): Promise<Array<ScriptInclude>>
         {
             return new Promise((resolve, reject) =>
             {
                 if (this.ApiProxy)
                 {
-                    var availableIncludes = this.ApiProxy.ListScriptIncludes();
+                    var availableIncludes = this.ApiProxy.GetScriptIncludes();
 
                     if (availableIncludes)
                     {
@@ -434,6 +478,15 @@ export namespace ServiceNow
             });
 
         }
+
+        /**
+         * SetScriptInclude
+         * Saves script include to current instance
+         */
+        public SaveScriptInclude(ScriptInclude: ServiceNow.ScriptInclude): void
+        {
+            //save
+        }
     }
 
     export class Api
@@ -446,7 +499,6 @@ export namespace ServiceNow
         private _HttpClient: Axios.AxiosInstance | undefined;
         public get HttpClient(): Axios.AxiosInstance | undefined
         {
-            // todo this guy is missing!!!
             return this._HttpClient;
         }
         public set HttpClient(v: Axios.AxiosInstance | undefined)
@@ -488,14 +540,27 @@ export namespace ServiceNow
         }
 
         /**
-         * ListScriptIncludes lists all available script includes
+         * GetScriptIncludes lists all available script includes
          */
-        public ListScriptIncludes(): Axios.AxiosPromise | undefined
+        public GetScriptIncludes(): Axios.AxiosPromise | undefined
         {
             if (this.HttpClient)
             {
                 let url = `${this._SNScriptIncludeTable}?sys_policy=""&sysparm_display_value=true`;
                 return this.HttpClient.get(url);
+            }
+        }
+
+        /**
+         * PatchScriptInclude
+         */
+        public PatchScriptInclude(scriptInclude: ServiceNow.ScriptInclude): Axios.AxiosPromise | undefined
+        {
+            if (this.HttpClient)
+            {
+                //api/now/table/sys_script_include/e0085ebbdb171780e1b873dcaf96197e
+                let url = `${this._SNScriptIncludeTable}/${scriptInclude.sys_id}`;
+                return this.HttpClient.patch(url, JSON.stringify(scriptInclude));
             }
         }
     }
@@ -557,7 +622,6 @@ export namespace ServiceNow
     {
         constructor(o: IsysRecord)
         {
-            //todo Fix propertynames in JSON serialization.
             this._sys_class_name = o.sys_class_name;
             this._sys_id = o.sys_id;
             this._sys_policy = o.sys_policy;
@@ -751,15 +815,4 @@ export namespace ServiceNow
             };
         }
     }
-
-
-    // // tslint:disable-next-line:class-name
-    // interface sys_metadata_json
-    // {
-    //     sys_class_name: string;
-    //     sys_id: string;
-    //     sys_policy: string;
-    //     sys_updated_on: string;
-    //     sys_created_on: string;
-    // }
 }
