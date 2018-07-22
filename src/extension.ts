@@ -144,14 +144,13 @@ export function activate(context: vscode.ExtensionContext)
             {
                 case "Script Include":
                     let include = wm.GetScriptInclude(e);
-                    console.log(include);
                     if (include)
                     {
                         let p = instance.SaveScriptInclude(include);
                         p.then((res) =>
                         {
                             vscode.window.showInformationMessage(`${res.name} Saved`);
-                            // save latest version
+                            wm.UpdateScriptInclude(res, e);
                         }).catch((e) =>
                         {
                             vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
@@ -166,6 +165,7 @@ export function activate(context: vscode.ExtensionContext)
 
     });
 
+    //todo on textdocument open check if we are latest.
     context.subscriptions.push(connect);
     context.subscriptions.push(GetInclude);
     context.subscriptions.push(clearWorkState);

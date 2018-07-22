@@ -109,7 +109,7 @@ export namespace ServiceNow
         }
 
         /**
-         * AddScriptInclude or updates a script include
+         * AddScriptInclude, adds a new script include to the workspace
          */
         public AddScriptInclude(record: ScriptInclude, instance: Instance)
         {
@@ -117,7 +117,7 @@ export namespace ServiceNow
 
             if (instancePath)
             {
-                let includedir = `${instancePath}\\ScriptInclude`;
+                let includedir = this.GetPathScriptInclude(instance);
                 this.CreateFolder(includedir);
 
                 let MetaDir = `${includedir}\\${record.name}`;
@@ -127,6 +127,17 @@ export namespace ServiceNow
 
                 this.CreateFile(`${MetaDir}\\${record.name}.script.js`, record.script);
             }
+        }
+
+        /**
+         * UpdateScriptInclude, updates a script include that have already been added.
+         */
+        public UpdateScriptInclude(record: ScriptInclude, textDocument: vscode.TextDocument)
+        {
+            //todo save JSON as pretty printed
+            this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, JSON.stringify(record));
+            this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
+
         }
 
         /**
@@ -153,6 +164,11 @@ export namespace ServiceNow
             }
         }
 
+        private GetPathScriptInclude(instanse: ServiceNow.Instance): string
+        {
+            let p = this.GetPathInstance(instanse);
+            return `${p}\\ScriptInclude`;
+        }
         private GetPathParent(Uri: vscode.Uri): string
         {
             let nameLength = this.GetFileName(Uri).length;
@@ -291,11 +307,36 @@ export namespace ServiceNow
             }
         }
 
+        private OverwriteFile(path: string, value: string): void
+        {
+            if (this.FileExist(path))
+            {
+                this.WriteFile(path, "");
+                this.WriteFile(path, value);
+            }
+            else
+            {
+                console.warn(`File not found: ${path}`);
+            }
+        }
+
         private CreateFile(path: string, value: string): void
         {
             if (!this.FileExist(path))
             {
+                this.WriteFile(path, value);
+            }
+        }
+
+        private WriteFile(path: string, value: string): void
+        {
+            try
+            {
                 fileSystem.writeFile(path, value, 'utf8', (err) => { console.error(err.message); });
+            }
+            catch (e)
+            {
+                console.error(e);
             }
         }
 
