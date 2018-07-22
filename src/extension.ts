@@ -145,7 +145,18 @@ export function activate(context: vscode.ExtensionContext)
                 case "Script Include":
                     let include = wm.GetScriptInclude(e);
                     console.log(include);
-                    //todo put record
+                    if (include)
+                    {
+                        let p = instance.SaveScriptInclude(include);
+                        p.then((res) =>
+                        {
+                            vscode.window.showInformationMessage(`${res.name} Saved`);
+                            // save latest version
+                        }).catch((e) =>
+                        {
+                            vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
+                        });
+                    }
                     break;
                 default:
                     console.warn("Record not Recognized");

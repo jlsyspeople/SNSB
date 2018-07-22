@@ -109,7 +109,7 @@ export namespace ServiceNow
         }
 
         /**
-         * AddScriptInclude
+         * AddScriptInclude or updates a script include
          */
         public AddScriptInclude(record: ScriptInclude, instance: Instance)
         {
@@ -130,31 +130,26 @@ export namespace ServiceNow
         }
 
         /**
-         * GetScriptIncludew, constructs a ScriptInclude object from workspace files
+         * GetScriptInclude, constructs a ScriptInclude object from workspace files
          */
         public GetScriptInclude(textDocument: vscode.TextDocument): ServiceNow.ScriptInclude | undefined
         {
-            let record = this.GetRecord(textDocument);
+            //get options
+            let serialized = this.ReadTextFile(this.GetPathRecordOptions(textDocument.uri));
 
-            if (record && record.sys_class_name === "Script Include")
+            let deserialized: ScriptInclude;
+            if (serialized)
             {
-                //get options
-                let serialized = this.ReadTextFile(this.GetPathRecordOptions(textDocument.uri));
+                deserialized = new ScriptInclude(JSON.parse(serialized));
 
-                let deserialized: ScriptInclude;
-                if (serialized)
+                //get script
+                let script = this.ReadTextFile(this.GetPathRecordScript(textDocument.uri));
+
+                if (script)
                 {
-                    deserialized = new ScriptInclude(JSON.parse(serialized));
-
-                    //get script
-                    let script = this.ReadTextFile(this.GetPathRecordScript(textDocument.uri));
-
-                    if (script)
-                    {
-                        deserialized.script = script;
-                    }
-                    return deserialized;
+                    deserialized.script = script;
                 }
+                return deserialized;
             }
         }
 
@@ -476,16 +471,41 @@ export namespace ServiceNow
                     }
                 }
             });
-
         }
 
         /**
          * SetScriptInclude
          * Saves script include to current instance
+         * returns an update script include object on resolve. 
+         * Returns an error object on reject.
          */
-        public SaveScriptInclude(ScriptInclude: ServiceNow.ScriptInclude): void
+        public SaveScriptInclude(scriptInclude: ServiceNow.ScriptInclude): Promise<ScriptInclude>
         {
-            //save
+            return new Promise((resolve, reject) =>
+            {
+                if (this.ApiProxy)
+                {
+                    let patch = this.ApiProxy.PatchScriptInclude(scriptInclude);
+                    if (patch)
+                    {
+                        patch.then((res) =>
+                        {
+                            if (res.data.result)
+                            {
+                                //todo this timesout for some reason
+                                let si = new ServiceNow.ScriptInclude(res.data.result);
+                                resolve(si);
+                            }
+                            else
+                            {
+                                //todo Turn api errors into a class?
+                                reject(res.data);
+                            }
+                        });
+                    }
+                }
+            });
+
         }
     }
 
@@ -513,11 +533,21 @@ export namespace ServiceNow
         {
             if (Instance.Url && Instance.UserName)
             {
-                let fullUrl = Instance.Url.href + this._SNApiEndpoint;
+                let host: string;
+                if (Instance.Url.href.endsWith('/'))
+                {
+                    host = Instance.Url.href.slice(0, Instance.Url.href.length - 1);
+                }
+                else
+                {
+                    host = Instance.Url.href;
+                }
+
+                let fullUrl = host + this._SNApiEndpoint;
 
                 this._HttpClient = Axios.default.create({
                     baseURL: fullUrl,
-                    timeout: 30000,
+                    timeout: 3000,
                     auth: {
                         username: Instance.UserName,
                         password: Password
@@ -560,7 +590,11 @@ export namespace ServiceNow
             {
                 //api/now/table/sys_script_include/e0085ebbdb171780e1b873dcaf96197e
                 let url = `${this._SNScriptIncludeTable}/${scriptInclude.sys_id}`;
-                return this.HttpClient.patch(url, JSON.stringify(scriptInclude));
+                //trim data to speed up patch
+                let p = this.HttpClient.patch<ServiceNow.ScriptInclude>(url, {
+                    "script": scriptInclude.script
+                });
+                return p;
             }
         }
     }
