@@ -2,7 +2,6 @@ import { URL } from "url";
 import * as Axios from "axios";
 import * as vscode from 'vscode';
 import * as fileSystem from 'fs';
-import { resolve } from "dns";
 
 export namespace ServiceNow
 {
@@ -535,7 +534,7 @@ export namespace ServiceNow
                     {
                         reject(res);
                     }
-                }).then((e) =>
+                }).catch((e) =>
                 {
                     console.error(e);
                     throw e;

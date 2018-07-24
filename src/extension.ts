@@ -137,6 +137,7 @@ export function activate(context: vscode.ExtensionContext)
     {
         let record = wm.GetRecord(e);
 
+        //todo abstract record retrieval further. use record interface as parameter and let instance fiqure the rest out.
         if (record)
         {
             switch (record.sys_class_name)
@@ -167,6 +168,8 @@ export function activate(context: vscode.ExtensionContext)
     //todo on textdocument open check if we are latest. Else pull latest
     var listenerOnDidOpen = vscode.workspace.onDidOpenTextDocument((e) =>
     {
+        let updateRecord = false;
+
         var recordLocal = wm.GetRecord(e);
         if (recordLocal)
         {
@@ -175,9 +178,10 @@ export function activate(context: vscode.ExtensionContext)
             p.then((res) =>
             {
                 console.info("local Record Up to date");
-            }).then((e) =>
+            }).catch((e) =>
             {
                 console.warn("Local record outdated");
+                //todo get single include and save it. 
             });
         }
     });
