@@ -4,14 +4,16 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { URL } from 'url';
-import { ServiceNow } from './class/ServiceNow';
+import * as ServiceNow from './ServiceNow/all';
+import * as Managers from './Managers/all';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext)
 {
-    const wm = new ServiceNow.WorkspaceManager();
-    const wsm = new ServiceNow.WorkspaceStateManager(context);
+    
+    const wm = new Managers.WorkspaceManager();
+    const wsm = new Managers.WorkspaceStateManager(context);
 
     let instance: ServiceNow.Instance;
     if (wsm.HasInstanceInState)
@@ -43,7 +45,7 @@ export function activate(context: vscode.ExtensionContext)
                     if (url && usr)
                     {
                         instance.Initialize(new URL(url), usr, res);
-                        context.workspaceState.update(ServiceNow.StateKeys.password.toString(), res);
+                        context.workspaceState.update(Managers.StateKeys.password.toString(), res);
                     }
                 }
             });
@@ -57,7 +59,7 @@ export function activate(context: vscode.ExtensionContext)
             {
                 if (res !== undefined)
                 {
-                    context.workspaceState.update(ServiceNow.StateKeys.url.toString(), res);
+                    context.workspaceState.update(Managers.StateKeys.url.toString(), res);
 
                     option.prompt = "Enter User Name";
                     let PromiseUserName = vscode.window.showInputBox(option);
@@ -66,7 +68,7 @@ export function activate(context: vscode.ExtensionContext)
                     {
                         if (res !== undefined)
                         {
-                            context.workspaceState.update(ServiceNow.StateKeys.user.toString(), res);
+                            context.workspaceState.update(Managers.StateKeys.user.toString(), res);
 
                             option.prompt = "Enter Password";
                             let PromisePassword = vscode.window.showInputBox(option);
@@ -85,7 +87,7 @@ export function activate(context: vscode.ExtensionContext)
                                         {
                                             instance = new ServiceNow.Instance(new URL(url), usr, pw);
                                             wm.AddInstanceFolder(instance);
-                                            context.workspaceState.update(ServiceNow.StateKeys.password.toString(), pw);
+                                            context.workspaceState.update(Managers.StateKeys.password.toString(), pw);
                                         }
 
                                     } catch (error)
@@ -168,8 +170,6 @@ export function activate(context: vscode.ExtensionContext)
     //todo on textdocument open check if we are latest. Else pull latest
     var listenerOnDidOpen = vscode.workspace.onDidOpenTextDocument((e) =>
     {
-        let updateRecord = false;
-
         var recordLocal = wm.GetRecord(e);
         if (recordLocal)
         {
@@ -195,6 +195,6 @@ export function activate(context: vscode.ExtensionContext)
 // this method is called when your extension is deactivated
 export function deactivate(context: vscode.ExtensionContext)
 {
-    const wsm = new ServiceNow.WorkspaceStateManager(context);
+    const wsm = new Managers.WorkspaceStateManager(context);
     wsm.ClearSensitive();
 }
