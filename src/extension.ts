@@ -103,7 +103,6 @@ export function activate(context: vscode.ExtensionContext)
         }
     });
 
-    //todo upload on save
     //todo update all command
     let GetInclude = vscode.commands.registerCommand("snsb.getInclude", () =>
     {
@@ -165,11 +164,29 @@ export function activate(context: vscode.ExtensionContext)
 
     });
 
-    //todo on textdocument open check if we are latest.
+    //todo on textdocument open check if we are latest. Else pull latest
+    var listenerOnDidOpen = vscode.workspace.onDidOpenTextDocument((e) =>
+    {
+        var recordLocal = wm.GetRecord(e);
+        if (recordLocal)
+        {
+            var p = instance.IsLatest(recordLocal);
+
+            p.then((res) =>
+            {
+                console.info("local Record Up to date");
+            }).then((e) =>
+            {
+                console.warn("Local record outdated");
+            });
+        }
+    });
+
     context.subscriptions.push(connect);
     context.subscriptions.push(GetInclude);
     context.subscriptions.push(clearWorkState);
     context.subscriptions.push(listenerOnDidSave);
+    context.subscriptions.push(listenerOnDidOpen);
 }
 // this method is called when your extension is deactivated
 export function deactivate(context: vscode.ExtensionContext)

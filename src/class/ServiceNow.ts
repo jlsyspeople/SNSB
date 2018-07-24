@@ -2,6 +2,7 @@ import { URL } from "url";
 import * as Axios from "axios";
 import * as vscode from 'vscode';
 import * as fileSystem from 'fs';
+import { resolve } from "dns";
 
 export namespace ServiceNow
 {
@@ -515,6 +516,71 @@ export namespace ServiceNow
         }
 
         /**
+         * IsLatest, returns true if record passed is latest.
+         * resolves if latest, rejects if newer is found on instance
+         */
+        public IsLatest(record: Record): Promise<Record>
+        {
+            return new Promise((resolve, reject) =>
+            {
+                let p = this.GetRecord(record);
+
+                p.then((res) =>
+                {
+                    if (res.sys_updated_on <= record.sys_updated_on)
+                    {
+                        resolve(res);
+                    }
+                    else
+                    {
+                        reject(res);
+                    }
+                }).then((e) =>
+                {
+                    console.error(e);
+                    throw e;
+                });
+            });
+        }
+
+        /**
+         * GetRecord, returns record from instance via sys_metadata
+         */
+        private GetRecord(record: Record): Promise<Record>
+        {
+            return new Promise((resolve, reject) =>
+            {
+                if (this.ApiProxy)
+                {
+                    let p = this.ApiProxy.GetRecord(record.sys_id);
+                    if (p)
+                    {
+                        p.then((res) =>
+                        {
+                            if (res.data.result)
+                            {
+                                let r = new ServiceNow.Record(res.data.result);
+                                resolve(r);
+                            }
+                            else
+                            {
+                                reject(res.data);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        reject("axios Promise is null or undefined");
+                    }
+                }
+                else
+                {
+                    reject("API Proxy is null or undefined");
+                }
+            });
+
+        }
+        /**
          * SetScriptInclude
          * Saves script include to current instance
          * returns an update script include object on resolve. 
@@ -533,7 +599,6 @@ export namespace ServiceNow
                         {
                             if (res.data.result)
                             {
-                                //todo this timesout for some reason
                                 let si = new ServiceNow.ScriptInclude(res.data.result);
                                 resolve(si);
                             }
@@ -555,6 +620,7 @@ export namespace ServiceNow
         private _SNApiEndpoint = "/api";
         private _SNTableSuffix: string = "/now/table";
         private _SNUserTable: string = `${this._SNTableSuffix}/sys_user`;
+        private _SNMetaData: string = `${this._SNTableSuffix}/sys_metadata`;
         private _SNScriptIncludeTable: string = `${this._SNTableSuffix}/sys_script_include`;
 
         private _HttpClient: Axios.AxiosInstance | undefined;
@@ -610,6 +676,17 @@ export namespace ServiceNow
             }
         }
 
+        /**
+         * GetRecord, returns record from sys_metadata
+         */
+        public GetRecord(sysId: string): Axios.AxiosPromise | undefined
+        {
+            if (this.HttpClient)
+            {
+                let url = `${this._SNMetaData}/${sysId}`;
+                return this.HttpClient.get(url);
+            }
+        }
         /**
          * GetScriptIncludes lists all available script includes
          */
