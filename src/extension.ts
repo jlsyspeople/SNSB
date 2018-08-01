@@ -11,7 +11,7 @@ import * as Managers from './Managers/all';
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext)
 {
-    
+
     const wm = new Managers.WorkspaceManager();
     const wsm = new Managers.WorkspaceStateManager(context);
 
@@ -167,7 +167,6 @@ export function activate(context: vscode.ExtensionContext)
 
     });
 
-    //todo on textdocument open check if we are latest. Else pull latest
     var listenerOnDidOpen = vscode.workspace.onDidOpenTextDocument((e) =>
     {
         var recordLocal = wm.GetRecord(e);
@@ -177,11 +176,17 @@ export function activate(context: vscode.ExtensionContext)
 
             p.then((res) =>
             {
-                console.info("local Record Up to date");
+                console.warn("Local record outdated");
+                let pr = instance.GetScriptInclude(res.sys_id);
+
+                pr.then((res) =>
+                {
+                    wm.UpdateScriptInclude(res, e);
+                });
+
             }).catch((e) =>
             {
-                console.warn("Local record outdated");
-                //todo get single include and save it. 
+                console.info("local Record Up to date");
             });
         }
     });
