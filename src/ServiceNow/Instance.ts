@@ -180,6 +180,8 @@ export class Instance
                 if (include)
                 {
                     let result = new Array<ScriptInclude>();
+
+                    let statusmessage = vscode.window.setStatusBarMessage("loading Records", include);
                     include.then((res) =>
                     {
                         if (res.data.result.length > 0)
@@ -194,6 +196,7 @@ export class Instance
                         {
                             reject("No elements Found");
                         }
+                        statusmessage.dispose();
                     });
                 }
             }
