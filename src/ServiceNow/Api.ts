@@ -1,6 +1,7 @@
 import * as Axios from "axios";
 import { Instance } from './Instance';
 import { ScriptInclude } from './ScriptInclude';
+import { IsysRecord } from "./IsysRecord";
 
 export class Api
 {
@@ -153,11 +154,11 @@ export class Api
     /**
      * GetRecord, returns record from sys_metadata
      */
-    public GetRecord(sysId: string): Axios.AxiosPromise | undefined
+    public GetRecord(record: IsysRecord): Axios.AxiosPromise | undefined
     {
         if (this.HttpClient)
         {
-            let url = `${this._SNMetaData}/${sysId}`;
+            let url = `${this._SNMetaData}/${record.sys_id}`;
             return this.HttpClient.get(url);
         }
     }
