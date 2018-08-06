@@ -265,6 +265,7 @@ export class Instance
         });
 
     }
+
     /**
      * SetScriptInclude
      * Saves script include to current instance

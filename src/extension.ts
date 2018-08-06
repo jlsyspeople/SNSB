@@ -163,7 +163,6 @@ export function activate(context: vscode.ExtensionContext)
                     break;
             }
         }
-
     });
 
     var listenerOnDidOpen = vscode.workspace.onDidOpenTextDocument((e) =>
@@ -171,18 +170,26 @@ export function activate(context: vscode.ExtensionContext)
         var recordLocal = wm.GetRecord(e);
         if (recordLocal)
         {
+
             var p = instance.IsLatest(recordLocal);
 
             p.then((res) =>
             {
-                console.warn("Local record outdated");
-                let pr = instance.GetScriptInclude(res.sys_id);
-
-                pr.then((res) =>
+                switch (res.sys_class_name)
                 {
-                    wm.UpdateScriptInclude(res, e);
-                });
+                    case "Script Include":
+                        let pr = instance.GetScriptInclude(res.sys_id);
 
+                        pr.then((res) =>
+                        {
+                            wm.UpdateScriptInclude(res, e);
+                        });
+                        break;
+
+                    default:
+                        console.warn("Record not Recognized");
+                        break;
+                }
             }).catch((e) =>
             {
                 console.info("local Record Up to date");
