@@ -133,6 +133,11 @@ export function activate(context: vscode.ExtensionContext)
         wsm.ClearState();
     });
 
+    let rebuildCache = vscode.commands.registerCommand("snsb.rebuildCache", () =>
+    {
+        instance.RebuildCache();
+    });
+
     var listenerOnDidSave = vscode.workspace.onDidSaveTextDocument((e) =>
     {
         let record = wm.GetRecord(e);
@@ -198,6 +203,7 @@ export function activate(context: vscode.ExtensionContext)
     context.subscriptions.push(connect);
     context.subscriptions.push(GetInclude);
     context.subscriptions.push(clearWorkState);
+    context.subscriptions.push(rebuildCache);
     context.subscriptions.push(listenerOnDidSave);
     context.subscriptions.push(listenerOnDidOpen);
 }

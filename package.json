@@ -24,12 +24,17 @@
             },
             {
                 "command": "snsb.getInclude",
-                "title": "Get Script Include",
+                "title": "Load Script Include",
                 "category": "snsb"
             },
             {
                 "command": "snsb.clearWorkSpaceState",
-                "title": "clear workstate",
+                "title": "Clear Instance",
+                "category": "snsb"
+            },
+            {
+                "command": "snsb.rebuildCache",
+                "title": "Refresh Records",
                 "category": "snsb"
             }
         ]
