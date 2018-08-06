@@ -153,18 +153,7 @@ export class Instance
             }
             else
             {
-                var p = this.GetScriptIncludesUpStream();
-
-                if (p)
-                {
-                    p.then((res) =>
-                    {
-                        resolve(res);
-                    }).catch((er) =>
-                    {
-                        reject(er);
-                    });
-                }
+                reject("No records found");
             }
         });
     }
@@ -181,7 +170,6 @@ export class Instance
                 {
                     let result = new Array<ScriptInclude>();
 
-                    let statusmessage = vscode.window.setStatusBarMessage("loading Records", include);
                     include.then((res) =>
                     {
                         if (res.data.result.length > 0)
@@ -196,7 +184,6 @@ export class Instance
                         {
                             reject("No elements Found");
                         }
-                        statusmessage.dispose();
                     });
                 }
             }
@@ -265,21 +252,40 @@ export class Instance
         });
     }
 
+    /**
+     * RebuildCache
+     */
+    public RebuildCache()
+    {
+        this.Cache();
+    }
+
     //will store objects in local storage
     private Cache(): void
     {
-        let p = this.GetScriptIncludesUpStream();
-        p.then((res) =>
+        if (this.IsInitialized)
         {
-            if (this._wsm)
+            let p = this.GetScriptIncludesUpStream();
+
+            let sMsg = vscode.window.setStatusBarMessage("loading Script Includes", p);
+            p.then((res) =>
             {
-                this._wsm.SetScriptIncludes(res);
-            }
-        });
+                if (this._wsm)
+                {
+                    this._wsm.SetScriptIncludes(res);
+                }
+                sMsg.dispose();
+            }).catch((e) =>
+            {
+                console.error(e);
+                sMsg.dispose();
+            });
+        }
     }
 
     /**
-     * GetRecord, returns record from instance via sys_metadata
+     * GetRecord, returns record metadata from instance
+     * 
      */
     private GetRecord(record: IsysRecord): Promise<Record>
     {
@@ -287,7 +293,7 @@ export class Instance
         {
             if (this.ApiProxy)
             {
-                let p = this.ApiProxy.GetRecord(record.sys_id);
+                let p = this.ApiProxy.GetRecord(record);
                 if (p)
                 {
                     p.then((res) =>
