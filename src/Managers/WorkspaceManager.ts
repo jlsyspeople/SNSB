@@ -1,6 +1,7 @@
 import * as fileSystem from 'fs';
 import * as vscode from 'vscode';
 import * as ServiceNow from '../ServiceNow/all';
+import { IsysRecord } from '../ServiceNow/all';
 
 export class WorkspaceManager
 {
@@ -38,7 +39,7 @@ export class WorkspaceManager
             let MetaDir = `${includedir}\\${record.name}`;
             this.CreateFolder(MetaDir);
 
-            this.CreateFile(`${MetaDir}\\${record.name}.options.json`, JSON.stringify(record));
+            this.CreateFile(`${MetaDir}\\${record.name}.options.json`, this.GetOptionsPretty(record));
 
             this.CreateFile(`${MetaDir}\\${record.name}.script.js`, record.script);
         }
@@ -49,8 +50,7 @@ export class WorkspaceManager
      */
     public UpdateScriptInclude(record: ServiceNow.ScriptInclude, textDocument: vscode.TextDocument)
     {
-        //todo save JSON as pretty printed
-        this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, JSON.stringify(record));
+        this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
         this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
 
         vscode.window.showInformationMessage(`${record.name} have been updated`);
@@ -78,6 +78,11 @@ export class WorkspaceManager
             }
             return deserialized;
         }
+    }
+
+    private GetOptionsPretty(record: IsysRecord): string
+    {
+        return JSON.stringify(record, null, 2);
     }
 
     private GetPathScriptInclude(instanse: ServiceNow.Instance): string
