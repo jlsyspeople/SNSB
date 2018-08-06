@@ -44,8 +44,7 @@ export function activate(context: vscode.ExtensionContext)
                     let usr = wsm.GetUserName();
                     if (url && usr)
                     {
-                        instance.Initialize(new URL(url), usr, res);
-                        context.workspaceState.update(Managers.StateKeys.password.toString(), res);
+                        instance.Initialize(new URL(url), usr, res, wsm);
                     }
                 }
             });
@@ -59,7 +58,7 @@ export function activate(context: vscode.ExtensionContext)
             {
                 if (res !== undefined)
                 {
-                    context.workspaceState.update(Managers.StateKeys.url.toString(), res);
+                    wsm.SetUrl(res);
 
                     option.prompt = "Enter User Name";
                     let PromiseUserName = vscode.window.showInputBox(option);
@@ -68,7 +67,7 @@ export function activate(context: vscode.ExtensionContext)
                     {
                         if (res !== undefined)
                         {
-                            context.workspaceState.update(Managers.StateKeys.user.toString(), res);
+                            wsm.SetUserName(res);
 
                             option.prompt = "Enter Password";
                             let PromisePassword = vscode.window.showInputBox(option);
@@ -85,9 +84,8 @@ export function activate(context: vscode.ExtensionContext)
 
                                         if (url !== undefined)
                                         {
-                                            instance = new ServiceNow.Instance(new URL(url), usr, pw);
+                                            instance = new ServiceNow.Instance(new URL(url), usr, pw, wsm);
                                             wm.AddInstanceFolder(instance);
-                                            context.workspaceState.update(Managers.StateKeys.password.toString(), pw);
                                         }
 
                                     } catch (error)

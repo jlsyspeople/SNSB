@@ -4,5 +4,6 @@ export enum StateKeys
     instance,
     url,
     user,
-    password
+    password,
+    scriptIncludes
 }

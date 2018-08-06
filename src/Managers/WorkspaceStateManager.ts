@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import {StateKeys} from "./StateKeys";
+import { StateKeys } from "./StateKeys";
+import { ScriptInclude } from "../ServiceNow/all";
 
 //get update and manage workpace state.
 export class WorkspaceStateManager
@@ -51,11 +52,27 @@ export class WorkspaceStateManager
     }
 
     /**
+     * SetUrl
+     */
+    public SetUrl(url: string): void
+    {
+        this._context.workspaceState.update(StateKeys.url.toString(), url);
+    }
+
+    /**
      * GetInstance get Url from state
      */
     public GetUrl(): string | undefined
     {
         return this._context.workspaceState.get(StateKeys.url.toString()) as string;
+    }
+
+    /**
+     * SetUserName
+     */
+    public SetUserName(url: string): void
+    {
+        this._context.workspaceState.update(StateKeys.user.toString(), url);
     }
 
     /**
@@ -67,10 +84,21 @@ export class WorkspaceStateManager
     }
 
     /**
-     * GetPassword retrieves password from state. 
+     * SetScriptIncludes
+     * Cache scriptIncludes in local storage
+     * overwrites existing
      */
-    public GetPassword(): string | undefined
+    public SetScriptIncludes(scriptInlcudes: Array<ScriptInclude>): void
     {
-        return this._context.workspaceState.get(StateKeys.password.toString()) as string;
+        this._context.workspaceState.update(StateKeys.scriptIncludes.toString(), scriptInlcudes);
     }
+
+    /**
+     * GetScriptIncludes
+     */
+    public GetScriptIncludes(): Array<ScriptInclude> | undefined
+    {
+        return this._context.workspaceState.get(StateKeys.scriptIncludes.toString());
+    }
+
 }

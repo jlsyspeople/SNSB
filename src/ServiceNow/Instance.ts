@@ -5,6 +5,7 @@ import { ScriptInclude } from './ScriptInclude';
 import { IsysScriptInclude } from './IsysScriptInclude';
 import { Record } from './Record';
 import { IsysRecord } from "./IsysRecord";
+import { WorkspaceStateManager } from "../Managers/all";
 
 
 /*
@@ -15,15 +16,15 @@ import { IsysRecord } from "./IsysRecord";
 export class Instance
 {
     //optimize performance
-    //todo load available records on connect.
-    constructor(Url?: URL, UserName?: string, Password?: string)
+    constructor(Url?: URL, UserName?: string, Password?: string, workspaceStateManager?: WorkspaceStateManager)
     {
-        if (Url && UserName && Password)
+        if (Url && UserName && Password && workspaceStateManager)
         {
-            this.Initialize(Url, UserName, Password);
+            this.Initialize(Url, UserName, Password, workspaceStateManager);
         }
     }
 
+    private _wsm: WorkspaceStateManager | undefined;
 
     private _userName: string | undefined;
     public get UserName(): string | undefined
@@ -71,8 +72,8 @@ export class Instance
     }
 
     /**
-             * IsInitialized
-             */
+     * IsInitialized
+     */
     public IsInitialized(): boolean
     {
         if (this._url && this._userName)
@@ -88,10 +89,11 @@ export class Instance
     /**
      * Initialize
      */
-    public Initialize(Url: URL, UserName: string, Password: string): void
+    public Initialize(Url: URL, UserName: string, Password: string, wsm: WorkspaceStateManager): void
     {
         this._url = Url;
         this._userName = UserName;
+        this._wsm = wsm;
 
         this._ApiProxy = new Api(this, Password);
         this.TestConnection();
@@ -116,6 +118,7 @@ export class Instance
                     if (res.data.result.length === 1)
                     {
                         vscode.window.showInformationMessage("Connected");
+                        this.Cache();
                         this._isPasswordValid = true;
                     }
                     else
@@ -136,6 +139,37 @@ export class Instance
      * Returns all available script includes as an array.
      */
     public GetScriptIncludes(): Promise<Array<ScriptInclude>>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            //load from local storage first.
+            if (this._wsm)
+            {
+                let si = this._wsm.GetScriptIncludes();
+                if (si)
+                {
+                    resolve(si);
+                }
+            }
+            else
+            {
+                var p = this.GetScriptIncludesUpStream();
+
+                if (p)
+                {
+                    p.then((res) =>
+                    {
+                        resolve(res);
+                    }).catch((er) =>
+                    {
+                        reject(er);
+                    });
+                }
+            }
+        });
+    }
+
+    private GetScriptIncludesUpStream(): Promise<Array<ScriptInclude>>
     {
         return new Promise((resolve, reject) =>
         {
@@ -225,6 +259,19 @@ export class Instance
                 console.error(e);
                 throw e;
             });
+        });
+    }
+
+    //will store objects in local storage
+    private Cache(): void
+    {
+        let p = this.GetScriptIncludesUpStream();
+        p.then((res) =>
+        {
+            if (this._wsm)
+            {
+                this._wsm.SetScriptIncludes(res);
+            }
         });
     }
 

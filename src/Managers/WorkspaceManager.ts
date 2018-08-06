@@ -198,10 +198,6 @@ export class WorkspaceManager
                 {
                     vscode.window.showErrorMessage(res.message);
                 }
-                else
-                {
-                    vscode.window.showInformationMessage("Folder created");
-                }
             });
         }
     }
