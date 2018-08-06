@@ -9,8 +9,8 @@ export class Record implements IsysRecord
         this._sys_class_name = o.sys_class_name;
         this._sys_id = o.sys_id;
         this._sys_policy = o.sys_policy;
-        this._sys_updated_on = o.sys_updated_on;
-        this._sys_created_on = o.sys_created_on;
+        this._sys_updated_on = new Date(o.sys_updated_on);
+        this._sys_created_on = new Date(o.sys_created_on);
         this._sys_package = new Relation(o.sys_package);
         this._sys_scope = new Relation(o.sys_scope);
     }
@@ -62,6 +62,7 @@ export class Record implements IsysRecord
      */
     public toJSON()
     {
+        //overwrite to JSON to ensure that json.stringify serializes with public property names and not the private ones. 
         return {
             sys_class_name: this._sys_class_name,
             sys_id: this._sys_id,

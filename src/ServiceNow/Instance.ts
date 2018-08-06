@@ -176,7 +176,7 @@ export class Instance
         {
             if (this.ApiProxy)
             {
-                var include = this.ApiProxy.GetScriptIncludes();
+                var include = this.ApiProxy.GetScriptInclude(sysId);
 
                 if (include)
                 {
@@ -197,14 +197,15 @@ export class Instance
     }
 
     /**
-     * IsLatest
+     * IsLatest 
      * resolves if newer is found upstream
-     * rejects latest
+     * rejects if latest
      */
     public IsLatest(record: IsysRecord): Promise<Record>
     {
         return new Promise((resolve, reject) =>
         {
+            //get upstream record
             let p = this.GetRecord(record);
 
             p.then((res) =>
@@ -212,6 +213,7 @@ export class Instance
                 //fix this comparison
                 if (res.sys_updated_on > record.sys_updated_on)
                 {
+                    //upstream newest
                     resolve(res);
                 }
                 else

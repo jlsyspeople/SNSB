@@ -53,6 +53,7 @@ export class WorkspaceManager
         this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, JSON.stringify(record));
         this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
 
+        vscode.window.showInformationMessage(`${record.name} have been updated`);
     }
 
     /**

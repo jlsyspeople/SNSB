@@ -139,7 +139,6 @@ export function activate(context: vscode.ExtensionContext)
     {
         let record = wm.GetRecord(e);
 
-        //todo abstract record retrieval further. use record interface as parameter and let instance fiqure the rest out.
         if (record)
         {
             switch (record.sys_class_name)

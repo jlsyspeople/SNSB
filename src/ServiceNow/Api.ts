@@ -48,7 +48,93 @@ export class Api
                     password: Password
                 }
             });
+
+            //convert date values to Iso 8106
+            this._HttpClient.interceptors.response.use((v) =>
+            {
+                if (v.data.result)
+                {
+                    if (v.data.result instanceof Array)
+                    {
+                        let arr = new Array<any>();
+                        // @ts-ignore
+                        v.data.result.forEach(element =>
+                        {
+                            element = this.fixDateOnRecord(element);
+                            arr.push(element);
+                        });
+                        v.data.result = arr;
+                    }
+                    else
+                    {
+                        if (v.data.result)
+                        {
+                            v.data.result = this.fixDateOnRecord(v.data.result);
+                        }
+                    }
+                }
+                return v;
+            });
         }
+    }
+
+    // @ts-ignore
+    private fixDateOnRecord(record)
+    {
+
+        if (record.sys_updated_on)
+        {
+            let date = record.sys_updated_on as string;
+
+            record.sys_updated_on = this.getDateFromServiceNowTime(date);
+        }
+        if (record.sys_created_on)
+        {
+            let date = record.sys_created_on as string;
+
+            record.sys_created_on = this.getDateFromServiceNowTime(date);
+        }
+
+        return record;
+    }
+
+    private getDateFromServiceNowTime(date: string): Date
+    {
+        // yyyy-mm-dd hh:mm:ss
+        // 2018-08-06 12:51:39
+        // dd/mm/yyyy
+        // 06/08/2018
+        var dt = date.split(' ');
+
+        let d = dt[0];
+        let t = dt[1];
+
+        let dSplit;
+
+        let year: number;
+        let month: number;
+        let day: number;
+
+        if (d.includes("/"))
+        {
+            dSplit = d.split('/');
+            year = Number.parseInt(dSplit[2]);
+            month = Number.parseInt(dSplit[1]) - 1;
+            day = Number.parseInt(dSplit[0]);
+        }
+        else
+        {
+            dSplit = d.split('-');
+            year = Number.parseInt(dSplit[0]);
+            month = Number.parseInt(dSplit[1]) - 1;
+            day = Number.parseInt(dSplit[2]);
+        }
+
+        let tSplit = t.split(':');
+
+        let f = new Date(year, month, day, Number.parseInt(tSplit[0]), Number.parseInt(tSplit[1]), Number.parseInt(tSplit[2]));
+
+        return f;
     }
 
     /**
