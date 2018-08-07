@@ -1,5 +1,5 @@
 
-export interface Test
+export interface IsysSpWidget
 {
     template: string;
     css: string;
