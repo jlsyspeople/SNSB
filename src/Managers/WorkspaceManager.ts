@@ -5,8 +5,27 @@ import { IsysRecord } from '../ServiceNow/all';
 
 export class WorkspaceManager
 {
-    constructor()
+    constructor(context: vscode.ExtensionContext)
     {
+        this.SetDelimiter(context);
+    }
+
+    private _delimiter: string | undefined;
+    private SetDelimiter(context: vscode.ExtensionContext)
+    {
+        let storagePath = context.storagePath;
+
+        if (storagePath)
+        {
+            if (storagePath.includes("/"))
+            {
+                this._delimiter = "/";
+            }
+            else
+            {
+                this._delimiter = "\\";
+            }
+        }
     }
 
     /**
@@ -36,12 +55,12 @@ export class WorkspaceManager
             let includedir = this.GetPathScriptInclude(instance);
             this.CreateFolder(includedir);
 
-            let MetaDir = `${includedir}\\${record.name}`;
+            let MetaDir = `${includedir}${this._delimiter}${record.name}`;
             this.CreateFolder(MetaDir);
 
-            this.CreateFile(`${MetaDir}\\${record.name}.options.json`, this.GetOptionsPretty(record));
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.options.json`, this.GetOptionsPretty(record));
 
-            this.CreateFile(`${MetaDir}\\${record.name}.script.js`, record.script);
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.script.js`, record.script);
         }
     }
 
@@ -88,7 +107,7 @@ export class WorkspaceManager
     private GetPathScriptInclude(instanse: ServiceNow.Instance): string
     {
         let p = this.GetPathInstance(instanse);
-        return `${p}\\ScriptInclude`;
+        return `${p}${this._delimiter}ScriptInclude`;
     }
     private GetPathParent(Uri: vscode.Uri): string
     {
@@ -98,7 +117,7 @@ export class WorkspaceManager
 
     private GetFileName(Uri: vscode.Uri): string
     {
-        let split = Uri.fsPath.split('\\');
+        let split = Uri.fsPath.split(`${this._delimiter}`);
         return split[split.length - 1];
     }
 
@@ -129,7 +148,7 @@ export class WorkspaceManager
 
         let recordName = this.GetFileName(uri);
 
-        return `${parentPath}\\${recordName.split('.')[0]}.script.js`;
+        return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.script.js`;
     }
 
     //returns the path of hte option.json that should reside in same dir. 
@@ -139,7 +158,7 @@ export class WorkspaceManager
 
         let recordName = this.GetFileName(uri);
 
-        return `${parentPath}\\${recordName.split('.')[0]}.options.json`;
+        return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.options.json`;
     }
 
     //read text files
@@ -162,7 +181,7 @@ export class WorkspaceManager
 
         if (workspaceRoot && i.Url)
         {
-            let path = `${workspaceRoot.uri.fsPath}\\${i.Url.host}`;
+            let path = `${workspaceRoot.uri.fsPath}${this._delimiter}${i.Url.host}`;
             return path;
         }
     }

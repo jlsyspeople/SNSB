@@ -12,7 +12,7 @@ import * as Managers from './Managers/all';
 export function activate(context: vscode.ExtensionContext)
 {
 
-    const wm = new Managers.WorkspaceManager();
+    const wm = new Managers.WorkspaceManager(context);
     const wsm = new Managers.WorkspaceStateManager(context);
 
     let instance: ServiceNow.Instance;
@@ -199,6 +199,8 @@ export function activate(context: vscode.ExtensionContext)
             });
         }
     });
+
+    let t = vscode.env.appRoot;
 
     context.subscriptions.push(connect);
     context.subscriptions.push(GetInclude);
