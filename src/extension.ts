@@ -201,8 +201,6 @@ export function activate(context: vscode.ExtensionContext)
         }
     });
 
-    let t = vscode.env.appRoot;
-
     context.subscriptions.push(connect);
     context.subscriptions.push(GetInclude);
     context.subscriptions.push(clearWorkState);
