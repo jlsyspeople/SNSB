@@ -45,6 +45,7 @@ export function activate(context: vscode.ExtensionContext)
                     if (url && usr)
                     {
                         instance.Initialize(new URL(url), usr, res, wsm);
+                        wm.AddInstanceFolder(instance);
                     }
                 }
             });
