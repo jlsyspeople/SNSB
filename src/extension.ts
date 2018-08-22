@@ -145,27 +145,38 @@ export function activate(context: vscode.ExtensionContext)
 
         if (record)
         {
-            switch (record.sys_class_name)
+            let p = instance.IsLatest(record);
+
+            p.then((res) =>
             {
-                case "Script Include":
-                    let include = wm.GetScriptInclude(e);
-                    if (include)
+                vscode.window.showWarningMessage(`Newer Version of record ${res.sys_id} Found on instance`);
+            }).catch((er) =>
+            {
+                if (record)
+                {
+                    switch (record.sys_class_name)
                     {
-                        let p = instance.SaveScriptInclude(include);
-                        p.then((res) =>
-                        {
-                            vscode.window.showInformationMessage(`${res.name} Saved`);
-                            wm.UpdateScriptInclude(res, e);
-                        }).catch((e) =>
-                        {
-                            vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
-                        });
+                        case "Script Include":
+                            let include = wm.GetScriptInclude(e);
+                            if (include)
+                            {
+                                let p = instance.SaveScriptInclude(include);
+                                p.then((res) =>
+                                {
+                                    vscode.window.showInformationMessage(`${res.name} Saved`);
+                                    wm.UpdateScriptInclude(res, e);
+                                }).catch((e) =>
+                                {
+                                    vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
+                                });
+                            }
+                            break;
+                        default:
+                            console.warn("Record not Recognized");
+                            break;
                     }
-                    break;
-                default:
-                    console.warn("Record not Recognized");
-                    break;
-            }
+                }
+            });
         }
     });
 
