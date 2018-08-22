@@ -11,6 +11,8 @@ export class Api
     private _SNUserTable: string = `${this._SNTableSuffix}/sys_user`;
     private _SNMetaData: string = `${this._SNTableSuffix}/sys_metadata`;
     private _SNScriptIncludeTable: string = `${this._SNTableSuffix}/sys_script_include`;
+    private _SNWidgetTable: string = `${this._SNTableSuffix}/sys_script_include`;
+
 
     private _HttpClient: Axios.AxiosInstance | undefined;
     public get HttpClient(): Axios.AxiosInstance | undefined
@@ -159,6 +161,32 @@ export class Api
         if (this.HttpClient)
         {
             let url = `${this._SNMetaData}/${record.sys_id}`;
+            return this.HttpClient.get(url);
+        }
+    }
+
+    /**
+     * GetWidgets
+     * returns all widgets that are editable
+     */
+    public GetWidgets(): Axios.AxiosPromise | undefined
+    {
+        if (this.HttpClient)
+        {
+            let url = `${this._SNWidgetTable}?internal=false&sys_policy=""&sysparm_display_value=true`;
+            return this.HttpClient.get(url);
+        }
+    }
+
+    /**
+     * GetWidget
+     * returns a single widget if it is editable.
+     */
+    public GetWidget(sysId: string): Axios.AxiosPromise | undefined
+    {
+        if (this.HttpClient)
+        {
+            let url = `${this._SNWidgetTable}/${sysId}?internal=false&sys_policy=""&sysparm_display_value=true`;
             return this.HttpClient.get(url);
         }
     }
