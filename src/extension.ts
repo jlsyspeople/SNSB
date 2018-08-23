@@ -11,7 +11,6 @@ import * as Managers from './Managers/all';
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext)
 {
-
     const wm = new Managers.WorkspaceManager(context);
     const wsm = new Managers.WorkspaceStateManager(context);
 
@@ -25,8 +24,6 @@ export function activate(context: vscode.ExtensionContext)
     console.info("SNSB Plugin Activated");
 
     //Configure instance object
-    //todo prober error message on access denied
-    //todo refactor? this looks way to fat
     let connect = vscode.commands.registerCommand('snsb.connect', () =>
     {
         let option = new Object() as vscode.InputBoxOptions;
@@ -104,10 +101,8 @@ export function activate(context: vscode.ExtensionContext)
         }
     });
 
-    //todo update all command
     let GetInclude = vscode.commands.registerCommand("snsb.getInclude", () =>
     {
-        // todo add loading indicator
         if (instance.IsInitialized())
         {
             console.log("loading includes");

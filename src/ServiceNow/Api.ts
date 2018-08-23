@@ -5,7 +5,6 @@ import { IsysRecord } from "./IsysRecord";
 
 export class Api
 {
-    //Todo restrict attributes fetched to the ones used
     private _SNApiEndpoint = "/api";
     private _SNTableSuffix: string = "/now/table";
     private _SNUserTable: string = `${this._SNTableSuffix}/sys_user`;
