@@ -1,5 +1,6 @@
+import { IsysRecord } from "./IsysRecord";
 
-export interface IsysSpWidget
+export interface IsysSpWidget extends IsysRecord
 {
     template: string;
     css: string;
