@@ -6,6 +6,8 @@ import { IsysScriptInclude } from './IsysScriptInclude';
 import { Record } from './Record';
 import { IsysRecord } from "./IsysRecord";
 import { WorkspaceStateManager } from "../Managers/all";
+import { Widget } from "./Widget";
+import { IsysSpWidget } from "./IsysSpWidget";
 
 
 /*
@@ -190,6 +192,38 @@ export class Instance
         });
     }
 
+    private GetWidgetsUpStream(): Promise<Array<Widget>>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this.ApiProxy)
+            {
+                var include = this.ApiProxy.GetWidgets();
+
+                if (include)
+                {
+                    let result = new Array<Widget>();
+
+                    include.then((res) =>
+                    {
+                        if (res.data.result.length > 0)
+                        {
+                            res.data.result.forEach((element: IsysSpWidget) =>
+                            {
+                                result.push(new Widget(element));
+                            });
+                            resolve(result);
+                        }
+                        else
+                        {
+                            reject("No elements Found");
+                        }
+                    });
+                }
+            }
+        });
+    }
+
     /**
      * GetScriptInclude
      * 
@@ -265,10 +299,10 @@ export class Instance
     {
         if (this.IsInitialized)
         {
-            let p = this.GetScriptIncludesUpStream();
+            let includes = this.GetScriptIncludesUpStream();
 
-            let sMsg = vscode.window.setStatusBarMessage("loading Script Includes", p);
-            p.then((res) =>
+            let sMsg = vscode.window.setStatusBarMessage("Loading Script Includes", includes);
+            includes.then((res) =>
             {
                 if (this._wsm)
                 {
@@ -279,6 +313,23 @@ export class Instance
             {
                 console.error(e);
                 sMsg.dispose();
+            });
+
+            let widgets = this.GetWidgetsUpStream();
+
+            let wMsg = vscode.window.setStatusBarMessage("Loading Widgets", widgets);
+
+            widgets.then((res) =>
+            {
+                if (this._wsm)
+                {
+                    this._wsm.SetWidgets(res);
+                }
+                wMsg.dispose();
+            }).catch((er) =>
+            {
+                console.error(er);
+                wMsg.dispose();
             });
         }
     }
