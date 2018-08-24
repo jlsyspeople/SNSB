@@ -1,8 +1,9 @@
+import * as vscode from 'vscode';
 import { IsysSpWidget } from "./IsysSpWidget";
 import { Record } from "./Record";
 
 
-export class Widget extends Record implements IsysSpWidget
+export class Widget extends Record implements IsysSpWidget, vscode.QuickPickItem
 {
     constructor(w: IsysSpWidget)
     {
@@ -27,6 +28,16 @@ export class Widget extends Record implements IsysSpWidget
         this.data_table = w.data_table;
         this.name = w.name;
         this.controller_as = w.controller_as;
+    }
+
+    public get label(): string
+    {
+        return this.name;
+    }
+
+    public get detail(): string | undefined
+    {
+        return this.description;
     }
 
     template: string;
