@@ -17,6 +17,7 @@ import { IsysSpWidget } from "./IsysSpWidget";
 //Instantiate to reset credentials
 export class Instance
 {
+
     //optimize performance
     constructor(Url?: URL, UserName?: string, Password?: string, workspaceStateManager?: WorkspaceStateManager)
     {
@@ -371,6 +372,33 @@ export class Instance
             }
         });
 
+    }
+
+    SaveWidget(widget: Widget): Promise<Widget>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this.ApiProxy)
+            {
+                let patch = this.ApiProxy.PatchWidget(widget);
+                if (patch)
+                {
+                    patch.then((res) =>
+                    {
+                        if (res.data.result)
+                        {
+                            let widget = new Widget(res.data.result);
+                            resolve(widget);
+                        }
+                        else
+                        {
+                            //todo Turn api errors into a class?
+                            reject(res.data);
+                        }
+                    });
+                }
+            }
+        });
     }
 
     /**

@@ -2,9 +2,11 @@ import * as Axios from "axios";
 import { Instance } from './Instance';
 import { ScriptInclude } from './ScriptInclude';
 import { IsysRecord } from "./IsysRecord";
+import { Widget } from "./Widget";
 
 export class Api
 {
+
     private _SNApiEndpoint = "/api";
     private _SNTableSuffix: string = "/now/table";
     private _SNUserTable: string = `${this._SNTableSuffix}/sys_user`;
@@ -213,6 +215,21 @@ export class Api
         {
             let url = `${this._SNScriptIncludeTable}/${sysId}?sysparm_display_value=true`;
             return this.HttpClient.get(url);
+        }
+    }
+
+    PatchWidget(widget: Widget): Axios.AxiosPromise | undefined
+    {
+        if (this.HttpClient)
+        {
+            let url = `${this._SNWidgetTable}/${widget.sys_id}`;
+            //trim data to speed up patch
+            let p = this.HttpClient.patch<Widget>(url, {
+                "script": widget.script,
+                "css": widget.css,
+                "client_script": widget.client_script
+            });
+            return p;
         }
     }
 
