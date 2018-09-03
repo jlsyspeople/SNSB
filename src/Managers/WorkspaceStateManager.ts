@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { StateKeys } from "./StateKeys";
-import { ScriptInclude } from "../ServiceNow/all";
+import { ScriptInclude, Widget } from "../ServiceNow/all";
 
 //get update and manage workpace state.
 export class WorkspaceStateManager
@@ -88,9 +88,9 @@ export class WorkspaceStateManager
      * Cache scriptIncludes in local storage
      * overwrites existing
      */
-    public SetScriptIncludes(scriptInlcudes: Array<ScriptInclude>): void
+    public SetScriptIncludes(scriptIncludes: Array<ScriptInclude>): void
     {
-        this._context.workspaceState.update(StateKeys.scriptIncludes.toString(), scriptInlcudes);
+        this._context.workspaceState.update(StateKeys.scriptIncludes.toString(), scriptIncludes);
     }
 
     /**
@@ -101,4 +101,19 @@ export class WorkspaceStateManager
         return this._context.workspaceState.get(StateKeys.scriptIncludes.toString());
     }
 
+    /**
+     * SetWidgets
+     */
+    public SetWidgets(Widgets: Array<Widget>): void
+    {
+        this._context.workspaceState.update(StateKeys.widget.toString(), Widgets);
+    }
+
+    /**
+     * GetWidgets
+     */
+    public GetWidgets(): Array<Widget> | undefined
+    {
+        return this._context.workspaceState.get(StateKeys.widget.toString());
+    }
 }

@@ -6,6 +6,8 @@ import { IsysScriptInclude } from './IsysScriptInclude';
 import { Record } from './Record';
 import { IsysRecord } from "./IsysRecord";
 import { WorkspaceStateManager } from "../Managers/all";
+import { Widget } from "./Widget";
+import { IsysSpWidget } from "./IsysSpWidget";
 
 
 /*
@@ -15,6 +17,9 @@ import { WorkspaceStateManager } from "../Managers/all";
 //Instantiate to reset credentials
 export class Instance
 {
+
+
+
     //optimize performance
     constructor(Url?: URL, UserName?: string, Password?: string, workspaceStateManager?: WorkspaceStateManager)
     {
@@ -142,7 +147,6 @@ export class Instance
     {
         return new Promise((resolve, reject) =>
         {
-            //load from local storage first.
             if (this._wsm)
             {
                 let si = this._wsm.GetScriptIncludes();
@@ -190,6 +194,7 @@ export class Instance
         });
     }
 
+
     /**
      * GetScriptInclude
      * 
@@ -209,6 +214,83 @@ export class Instance
                         if (res.data.result)
                         {
                             resolve(new ScriptInclude(res.data.result));
+                        }
+                        else
+                        {
+                            reject(res.data);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    GetWidgets(): Promise<Widget[]>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this._wsm)
+            {
+                let wi = this._wsm.GetWidgets();
+                if (wi)
+                {
+                    resolve(wi);
+                }
+            }
+            else
+            {
+                reject("No records found");
+            }
+        });
+    }
+
+    private GetWidgetsUpStream(): Promise<Array<Widget>>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this.ApiProxy)
+            {
+                var include = this.ApiProxy.GetWidgets();
+
+                if (include)
+                {
+                    let result = new Array<Widget>();
+
+                    include.then((res) =>
+                    {
+                        if (res.data.result.length > 0)
+                        {
+                            res.data.result.forEach((element: IsysSpWidget) =>
+                            {
+                                result.push(new Widget(element));
+                            });
+                            resolve(result);
+                        }
+                        else
+                        {
+                            reject("No elements Found");
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    GetWidget(sys_id: string): Promise<Widget>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this.ApiProxy)
+            {
+                var widget = this.ApiProxy.GetWidget(sys_id);
+
+                if (widget)
+                {
+                    widget.then((res) =>
+                    {
+                        if (res.data.result)
+                        {
+                            resolve(new Widget(res.data.result));
                         }
                         else
                         {
@@ -265,10 +347,10 @@ export class Instance
     {
         if (this.IsInitialized)
         {
-            let p = this.GetScriptIncludesUpStream();
+            let includes = this.GetScriptIncludesUpStream();
 
-            let sMsg = vscode.window.setStatusBarMessage("loading Script Includes", p);
-            p.then((res) =>
+            let sMsg = vscode.window.setStatusBarMessage("Loading Script Includes", includes);
+            includes.then((res) =>
             {
                 if (this._wsm)
                 {
@@ -279,6 +361,23 @@ export class Instance
             {
                 console.error(e);
                 sMsg.dispose();
+            });
+
+            let widgets = this.GetWidgetsUpStream();
+
+            let wMsg = vscode.window.setStatusBarMessage("Loading Widgets", widgets);
+
+            widgets.then((res) =>
+            {
+                if (this._wsm)
+                {
+                    this._wsm.SetWidgets(res);
+                }
+                wMsg.dispose();
+            }).catch((er) =>
+            {
+                console.error(er);
+                wMsg.dispose();
             });
         }
     }
@@ -320,6 +419,33 @@ export class Instance
             }
         });
 
+    }
+
+    SaveWidget(widget: Widget): Promise<Widget>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this.ApiProxy)
+            {
+                let patch = this.ApiProxy.PatchWidget(widget);
+                if (patch)
+                {
+                    patch.then((res) =>
+                    {
+                        if (res.data.result)
+                        {
+                            let widget = new Widget(res.data.result);
+                            resolve(widget);
+                        }
+                        else
+                        {
+                            //todo Turn api errors into a class?
+                            reject(res.data);
+                        }
+                    });
+                }
+            }
+        });
     }
 
     /**

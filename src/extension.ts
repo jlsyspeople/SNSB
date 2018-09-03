@@ -11,8 +11,7 @@ import * as Managers from './Managers/all';
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext)
 {
-
-    const wm = new Managers.WorkspaceManager();
+    const wm = new Managers.WorkspaceManager(context);
     const wsm = new Managers.WorkspaceStateManager(context);
 
     let instance: ServiceNow.Instance;
@@ -25,8 +24,6 @@ export function activate(context: vscode.ExtensionContext)
     console.info("SNSB Plugin Activated");
 
     //Configure instance object
-    //todo prober error message on access denied
-    //todo refactor? this looks way to fat
     let connect = vscode.commands.registerCommand('snsb.connect', () =>
     {
         let option = new Object() as vscode.InputBoxOptions;
@@ -45,6 +42,7 @@ export function activate(context: vscode.ExtensionContext)
                     if (url && usr)
                     {
                         instance.Initialize(new URL(url), usr, res, wsm);
+                        wm.AddInstanceFolder(instance);
                     }
                 }
             });
@@ -103,13 +101,11 @@ export function activate(context: vscode.ExtensionContext)
         }
     });
 
-    //todo update all command
-    let GetInclude = vscode.commands.registerCommand("snsb.getInclude", () =>
+    let getInclude = vscode.commands.registerCommand("snsb.getInclude", () =>
     {
-        // todo add loading indicator
         if (instance.IsInitialized())
         {
-            console.log("loading includes");
+            console.log("get includes");
             let includes = instance.GetScriptIncludes();
             includes.then((res) =>
             {
@@ -118,6 +114,29 @@ export function activate(context: vscode.ExtensionContext)
                     if (item)
                     {
                         wm.AddScriptInclude(item, instance);
+                    }
+                });
+            });
+        }
+        else
+        {
+            vscode.window.showErrorMessage("Connect to an instance");
+        }
+    });
+
+    let getWidget = vscode.commands.registerCommand("snsb.getWidget", () =>
+    {
+        if (instance.IsInitialized())
+        {
+            console.log("Get Widgets");
+            let widgets = instance.GetWidgets();
+            widgets.then((res) =>
+            {
+                vscode.window.showQuickPick(res).then((item) =>
+                {
+                    if (item)
+                    {
+                        wm.AddWidget(item, instance);
                     }
                 });
             });
@@ -144,27 +163,53 @@ export function activate(context: vscode.ExtensionContext)
 
         if (record)
         {
-            switch (record.sys_class_name)
+            let p = instance.IsLatest(record);
+
+            p.then((res) =>
             {
-                case "Script Include":
-                    let include = wm.GetScriptInclude(e);
-                    if (include)
+                vscode.window.showWarningMessage(`Newer Version of record ${res.sys_id} Found on instance`);
+            }).catch((er) =>
+            {
+                if (record)
+                {
+                    switch (record.sys_class_name)
                     {
-                        let p = instance.SaveScriptInclude(include);
-                        p.then((res) =>
-                        {
-                            vscode.window.showInformationMessage(`${res.name} Saved`);
-                            wm.UpdateScriptInclude(res, e);
-                        }).catch((e) =>
-                        {
-                            vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
-                        });
+                        case "script_include":
+                            let include = wm.GetScriptInclude(e);
+                            if (include)
+                            {
+                                let p = instance.SaveScriptInclude(include);
+                                p.then((res) =>
+                                {
+                                    vscode.window.showInformationMessage(`${res.name} Saved`);
+                                    wm.UpdateScriptInclude(res, e);
+                                }).catch((e) =>
+                                {
+                                    vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
+                                });
+                            }
+                            break;
+                        case "widget":
+                            let widget = wm.GetWidget(e);
+                            if (widget)
+                            {
+                                let p = instance.SaveWidget(widget);
+                                p.then((res) =>
+                                {
+                                    vscode.window.showInformationMessage(`${res.name} Saved`);
+                                    wm.UpdateWidget(res, e);
+                                }).catch((e) =>
+                                {
+                                    vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
+                                });
+                            }
+                            break;
+                        default:
+                            console.warn("Record not Recognized");
+                            break;
                     }
-                    break;
-                default:
-                    console.warn("Record not Recognized");
-                    break;
-            }
+                }
+            });
         }
     });
 
@@ -180,7 +225,7 @@ export function activate(context: vscode.ExtensionContext)
             {
                 switch (res.sys_class_name)
                 {
-                    case "Script Include":
+                    case "script_include":
                         let pr = instance.GetScriptInclude(res.sys_id);
 
                         pr.then((res) =>
@@ -188,7 +233,14 @@ export function activate(context: vscode.ExtensionContext)
                             wm.UpdateScriptInclude(res, e);
                         });
                         break;
+                    case "widget":
+                        let w = instance.GetWidget(res.sys_id);
 
+                        w.then((res) =>
+                        {
+                            wm.UpdateWidget(res, e);
+                        });
+                        break;
                     default:
                         console.warn("Record not Recognized");
                         break;
@@ -201,11 +253,14 @@ export function activate(context: vscode.ExtensionContext)
     });
 
     context.subscriptions.push(connect);
-    context.subscriptions.push(GetInclude);
+    context.subscriptions.push(getInclude);
+    context.subscriptions.push(getWidget);
     context.subscriptions.push(clearWorkState);
     context.subscriptions.push(rebuildCache);
     context.subscriptions.push(listenerOnDidSave);
     context.subscriptions.push(listenerOnDidOpen);
+
+
 }
 // this method is called when your extension is deactivated
 export function deactivate(context: vscode.ExtensionContext)

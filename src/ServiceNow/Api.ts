@@ -2,15 +2,18 @@ import * as Axios from "axios";
 import { Instance } from './Instance';
 import { ScriptInclude } from './ScriptInclude';
 import { IsysRecord } from "./IsysRecord";
+import { Widget } from "./Widget";
 
 export class Api
 {
-    //Todo restrict attributes fetched to the ones used
+
     private _SNApiEndpoint = "/api";
     private _SNTableSuffix: string = "/now/table";
     private _SNUserTable: string = `${this._SNTableSuffix}/sys_user`;
     private _SNMetaData: string = `${this._SNTableSuffix}/sys_metadata`;
     private _SNScriptIncludeTable: string = `${this._SNTableSuffix}/sys_script_include`;
+    private _SNWidgetTable: string = `${this._SNTableSuffix}/sp_widget`;
+
 
     private _HttpClient: Axios.AxiosInstance | undefined;
     public get HttpClient(): Axios.AxiosInstance | undefined
@@ -164,6 +167,32 @@ export class Api
     }
 
     /**
+     * GetWidgets
+     * returns all widgets that are editable
+     */
+    public GetWidgets(): Axios.AxiosPromise | undefined
+    {
+        if (this.HttpClient)
+        {
+            let url = `${this._SNWidgetTable}?internal=false&sys_policy=""&sysparm_display_value=true`;
+            return this.HttpClient.get(url);
+        }
+    }
+
+    /**
+     * GetWidget
+     * returns a single widget if it is editable.
+     */
+    public GetWidget(sysId: string): Axios.AxiosPromise | undefined
+    {
+        if (this.HttpClient)
+        {
+            let url = `${this._SNWidgetTable}/${sysId}?internal=false&sys_policy=""&sysparm_display_value=true`;
+            return this.HttpClient.get(url);
+        }
+    }
+
+    /**
      * GetScriptIncludes lists all available script includes
      * only returns includes that are not restricted by sys policy
      */
@@ -186,6 +215,21 @@ export class Api
         {
             let url = `${this._SNScriptIncludeTable}/${sysId}?sysparm_display_value=true`;
             return this.HttpClient.get(url);
+        }
+    }
+
+    PatchWidget(widget: Widget): Axios.AxiosPromise | undefined
+    {
+        if (this.HttpClient)
+        {
+            let url = `${this._SNWidgetTable}/${widget.sys_id}`;
+            //trim data to speed up patch
+            let p = this.HttpClient.patch<Widget>(url, {
+                "script": widget.script,
+                "css": widget.css,
+                "client_script": widget.client_script
+            });
+            return p;
         }
     }
 

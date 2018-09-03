@@ -5,8 +5,28 @@ import { IsysRecord } from '../ServiceNow/all';
 
 export class WorkspaceManager
 {
-    constructor()
+
+    constructor(context: vscode.ExtensionContext)
     {
+        this.SetDelimiter(context);
+    }
+
+    private _delimiter: string | undefined;
+    private SetDelimiter(context: vscode.ExtensionContext)
+    {
+        let storagePath = context.storagePath;
+
+        if (storagePath)
+        {
+            if (storagePath.includes("/"))
+            {
+                this._delimiter = "/";
+            }
+            else
+            {
+                this._delimiter = "\\";
+            }
+        }
     }
 
     /**
@@ -25,9 +45,76 @@ export class WorkspaceManager
     }
 
     /**
+     * AddWidget
+     */
+    public AddWidget(record: ServiceNow.Widget, instance: ServiceNow.Instance): void
+    {
+        let instancePath = this.GetPathInstance(instance);
+
+        if (instancePath)
+        {
+            let widgetDir = this.GetPathWidget(instance);
+            this.CreateFolder(widgetDir);
+
+            let MetaDir = `${widgetDir}${this._delimiter}${record.name}`;
+            this.CreateFolder(MetaDir);
+
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.options.json`, this.GetOptionsPretty(record));
+
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.client_script.js`, record.client_script);
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.server_script.js`, record.script);
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.css`, record.css);
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.html`, record.template);
+        }
+    }
+
+    /**
+     * UpdateWidget
+     */
+    public UpdateWidget(record: ServiceNow.Widget, textDocument: vscode.TextDocument): void
+    {
+        this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
+        this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
+        this.OverwriteFile(`${this.GetPathRecordClientScript(textDocument.uri)}`, record.client_script);
+        this.OverwriteFile(`${this.GetPathRecordHtmlTemplate(textDocument.uri)}`, record.template);
+
+        console.info(`${record.name} have been saved to workspace`);
+    }
+
+    /**
+     * GetWidget
+     */
+    public GetWidget(textDocument: vscode.TextDocument): ServiceNow.Widget | undefined
+    {
+        //get options
+        let serialized = this.ReadTextFile(this.GetPathRecordOptions(textDocument.uri));
+
+        let deserialized: ServiceNow.Widget;
+        if (serialized)
+        {
+            deserialized = new ServiceNow.Widget(JSON.parse(serialized));
+
+            //get script
+            let script = this.ReadTextFile(this.GetPathRecordScript(textDocument.uri));
+            let clientScript = this.ReadTextFile(this.GetPathRecordClientScript(textDocument.uri));
+            let css = this.ReadTextFile(this.GetPathRecordCss(textDocument.uri));
+            let html = this.ReadTextFile(this.GetPathRecordHtmlTemplate(textDocument.uri));
+
+            if (script && clientScript && css && html)
+            {
+                deserialized.script = script;
+                deserialized.client_script = clientScript;
+                deserialized.css = css;
+                deserialized.template = html;
+            }
+            return deserialized;
+        }
+    }
+
+    /**
      * AddScriptInclude, adds a new script include to the workspace
      */
-    public AddScriptInclude(record: ServiceNow.ScriptInclude, instance: ServiceNow.Instance)
+    public AddScriptInclude(record: ServiceNow.ScriptInclude, instance: ServiceNow.Instance): void
     {
         let instancePath = this.GetPathInstance(instance);
 
@@ -36,24 +123,24 @@ export class WorkspaceManager
             let includedir = this.GetPathScriptInclude(instance);
             this.CreateFolder(includedir);
 
-            let MetaDir = `${includedir}\\${record.name}`;
+            let MetaDir = `${includedir}${this._delimiter}${record.name}`;
             this.CreateFolder(MetaDir);
 
-            this.CreateFile(`${MetaDir}\\${record.name}.options.json`, this.GetOptionsPretty(record));
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.options.json`, this.GetOptionsPretty(record));
 
-            this.CreateFile(`${MetaDir}\\${record.name}.script.js`, record.script);
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.server_script.js`, record.script);
         }
     }
 
     /**
      * UpdateScriptInclude, updates a script include that have already been added.
      */
-    public UpdateScriptInclude(record: ServiceNow.ScriptInclude, textDocument: vscode.TextDocument)
+    public UpdateScriptInclude(record: ServiceNow.ScriptInclude, textDocument: vscode.TextDocument): void
     {
         this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
         this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
 
-        vscode.window.showInformationMessage(`${record.name} have been updated`);
+        console.info(`${record.name} have been saved to workspace`);
     }
 
     /**
@@ -85,11 +172,29 @@ export class WorkspaceManager
         return JSON.stringify(record, null, 2);
     }
 
+    private GetPathInstance(i: ServiceNow.Instance): string | undefined
+    {
+        let workspaceRoot = this.GetPathWorkspace();
+
+        if (workspaceRoot && i.Url)
+        {
+            let path = `${workspaceRoot.uri.fsPath}${this._delimiter}${i.Url.host}`;
+            return path;
+        }
+    }
+
     private GetPathScriptInclude(instanse: ServiceNow.Instance): string
     {
         let p = this.GetPathInstance(instanse);
-        return `${p}\\ScriptInclude`;
+        return `${p}${this._delimiter}ScriptInclude`;
     }
+
+    private GetPathWidget(instanse: ServiceNow.Instance): string
+    {
+        let p = this.GetPathInstance(instanse);
+        return `${p}${this._delimiter}Widget`;
+    }
+
     private GetPathParent(Uri: vscode.Uri): string
     {
         let nameLength = this.GetFileName(Uri).length;
@@ -98,7 +203,7 @@ export class WorkspaceManager
 
     private GetFileName(Uri: vscode.Uri): string
     {
-        let split = Uri.fsPath.split('\\');
+        let split = Uri.fsPath.split(`${this._delimiter}`);
         return split[split.length - 1];
     }
 
@@ -126,10 +231,18 @@ export class WorkspaceManager
     private GetPathRecordScript(uri: vscode.Uri): string
     {
         let parentPath = this.GetPathParent(uri);
+        let recordName = this.GetFileName(uri);
+
+        return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.server_script.js`;
+    }
+
+    private GetPathRecordClientScript(uri: vscode.Uri): string
+    {
+        let parentPath = this.GetPathParent(uri);
 
         let recordName = this.GetFileName(uri);
 
-        return `${parentPath}\\${recordName.split('.')[0]}.script.js`;
+        return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.client_script.js`;
     }
 
     //returns the path of hte option.json that should reside in same dir. 
@@ -139,7 +252,25 @@ export class WorkspaceManager
 
         let recordName = this.GetFileName(uri);
 
-        return `${parentPath}\\${recordName.split('.')[0]}.options.json`;
+        return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.options.json`;
+    }
+
+    GetPathRecordCss(uri: vscode.Uri): string
+    {
+        let parentPath = this.GetPathParent(uri);
+
+        let recordName = this.GetFileName(uri);
+
+        return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.css`;
+    }
+
+    GetPathRecordHtmlTemplate(uri: vscode.Uri): string
+    {
+        let parentPath = this.GetPathParent(uri);
+
+        let recordName = this.GetFileName(uri);
+
+        return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.html`;
     }
 
     //read text files
@@ -156,16 +287,7 @@ export class WorkspaceManager
         }
     }
 
-    private GetPathInstance(i: ServiceNow.Instance): string | undefined
-    {
-        let workspaceRoot = this.GetPathWorkspace();
 
-        if (workspaceRoot && i.Url)
-        {
-            let path = `${workspaceRoot.uri.fsPath}\\${i.Url.host}`;
-            return path;
-        }
-    }
 
     private GetPathWorkspace(): vscode.WorkspaceFolder | undefined
     {
