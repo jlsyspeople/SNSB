@@ -12,7 +12,7 @@ export class Api
     private _SNUserTable: string = `${this._SNTableSuffix}/sys_user`;
     private _SNMetaData: string = `${this._SNTableSuffix}/sys_metadata`;
     private _SNScriptIncludeTable: string = `${this._SNTableSuffix}/sys_script_include`;
-    private _SNWidgetTable: string = `${this._SNTableSuffix}/sys_script_include`;
+    private _SNWidgetTable: string = `${this._SNTableSuffix}/sp_widget`;
 
 
     private _HttpClient: Axios.AxiosInstance | undefined;

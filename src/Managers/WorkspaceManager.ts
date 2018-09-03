@@ -5,6 +5,7 @@ import { IsysRecord } from '../ServiceNow/all';
 
 export class WorkspaceManager
 {
+
     constructor(context: vscode.ExtensionContext)
     {
         this.SetDelimiter(context);
@@ -63,6 +64,7 @@ export class WorkspaceManager
             this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.client_script.js`, record.client_script);
             this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.server_script.js`, record.script);
             this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.css`, record.css);
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.html`, record.template);
         }
     }
 
@@ -73,7 +75,9 @@ export class WorkspaceManager
     {
         this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
         this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
-        this.OverwriteFile(`${this.GetPathRecordClientScript(textDocument.uri)}`, record.script);
+        this.OverwriteFile(`${this.GetPathRecordClientScript(textDocument.uri)}`, record.client_script);
+        this.OverwriteFile(`${this.GetPathRecordHtmlTemplate(textDocument.uri)}`, record.template);
+
         console.info(`${record.name} have been saved to workspace`);
     }
 
@@ -92,10 +96,16 @@ export class WorkspaceManager
 
             //get script
             let script = this.ReadTextFile(this.GetPathRecordScript(textDocument.uri));
+            let clientScript = this.ReadTextFile(this.GetPathRecordClientScript(textDocument.uri));
+            let css = this.ReadTextFile(this.GetPathRecordCss(textDocument.uri));
+            let html = this.ReadTextFile(this.GetPathRecordHtmlTemplate(textDocument.uri));
 
-            if (script)
+            if (script && clientScript && css && html)
             {
                 deserialized.script = script;
+                deserialized.client_script = clientScript;
+                deserialized.css = css;
+                deserialized.template = html;
             }
             return deserialized;
         }
@@ -243,6 +253,24 @@ export class WorkspaceManager
         let recordName = this.GetFileName(uri);
 
         return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.options.json`;
+    }
+
+    GetPathRecordCss(uri: vscode.Uri): string
+    {
+        let parentPath = this.GetPathParent(uri);
+
+        let recordName = this.GetFileName(uri);
+
+        return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.css`;
+    }
+
+    GetPathRecordHtmlTemplate(uri: vscode.Uri): string
+    {
+        let parentPath = this.GetPathParent(uri);
+
+        let recordName = this.GetFileName(uri);
+
+        return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.html`;
     }
 
     //read text files

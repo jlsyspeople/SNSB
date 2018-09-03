@@ -36,6 +36,11 @@
                 "command": "snsb.rebuildCache",
                 "title": "Refresh Records",
                 "category": "snsb"
+            },
+            {
+                "command": "snsb.getWidget",
+                "title": "Load Widget",
+                "category": "snsb"
             }
         ]
     },

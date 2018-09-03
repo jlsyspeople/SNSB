@@ -19,6 +19,7 @@ export class Instance
 {
 
 
+
     //optimize performance
     constructor(Url?: URL, UserName?: string, Password?: string, workspaceStateManager?: WorkspaceStateManager)
     {
@@ -146,7 +147,6 @@ export class Instance
     {
         return new Promise((resolve, reject) =>
         {
-            //load from local storage first.
             if (this._wsm)
             {
                 let si = this._wsm.GetScriptIncludes();
@@ -225,6 +225,25 @@ export class Instance
         });
     }
 
+    GetWidgets(): Promise<Widget[]>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this._wsm)
+            {
+                let wi = this._wsm.GetWidgets();
+                if (wi)
+                {
+                    resolve(wi);
+                }
+            }
+            else
+            {
+                reject("No records found");
+            }
+        });
+    }
+
     private GetWidgetsUpStream(): Promise<Array<Widget>>
     {
         return new Promise((resolve, reject) =>
@@ -259,7 +278,28 @@ export class Instance
 
     GetWidget(sys_id: string): Promise<Widget>
     {
-        throw new Error("Method not implemented.");
+        return new Promise((resolve, reject) =>
+        {
+            if (this.ApiProxy)
+            {
+                var widget = this.ApiProxy.GetWidget(sys_id);
+
+                if (widget)
+                {
+                    widget.then((res) =>
+                    {
+                        if (res.data.result)
+                        {
+                            resolve(new Widget(res.data.result));
+                        }
+                        else
+                        {
+                            reject(res.data);
+                        }
+                    });
+                }
+            }
+        });
     }
 
     /**

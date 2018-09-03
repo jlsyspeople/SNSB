@@ -18,12 +18,18 @@ export class Record implements IsysRecord
     private _sys_class_name: string;
     public get sys_class_name(): string
     {
+        //Normalize sys_class_name
         let className = this._sys_class_name.toLocaleLowerCase().replace(" ", "_");
 
-        if (className.startsWith("sys_"))
+        let trimPrefix = ['sys_', 'sp_'];
+
+        trimPrefix.forEach(element =>
         {
-            className = className.replace("sys_", "");
-        }
+            if (className.startsWith(element))
+            {
+                className = className.replace(element, "");
+            }
+        });
 
         return className;
     }

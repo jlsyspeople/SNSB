@@ -101,11 +101,11 @@ export function activate(context: vscode.ExtensionContext)
         }
     });
 
-    let GetInclude = vscode.commands.registerCommand("snsb.getInclude", () =>
+    let getInclude = vscode.commands.registerCommand("snsb.getInclude", () =>
     {
         if (instance.IsInitialized())
         {
-            console.log("loading includes");
+            console.log("get includes");
             let includes = instance.GetScriptIncludes();
             includes.then((res) =>
             {
@@ -114,6 +114,29 @@ export function activate(context: vscode.ExtensionContext)
                     if (item)
                     {
                         wm.AddScriptInclude(item, instance);
+                    }
+                });
+            });
+        }
+        else
+        {
+            vscode.window.showErrorMessage("Connect to an instance");
+        }
+    });
+
+    let getWidget = vscode.commands.registerCommand("snsb.getWidget", () =>
+    {
+        if (instance.IsInitialized())
+        {
+            console.log("Get Widgets");
+            let widgets = instance.GetWidgets();
+            widgets.then((res) =>
+            {
+                vscode.window.showQuickPick(res).then((item) =>
+                {
+                    if (item)
+                    {
+                        wm.AddWidget(item, instance);
                     }
                 });
             });
@@ -230,11 +253,14 @@ export function activate(context: vscode.ExtensionContext)
     });
 
     context.subscriptions.push(connect);
-    context.subscriptions.push(GetInclude);
+    context.subscriptions.push(getInclude);
+    context.subscriptions.push(getWidget);
     context.subscriptions.push(clearWorkState);
     context.subscriptions.push(rebuildCache);
     context.subscriptions.push(listenerOnDidSave);
     context.subscriptions.push(listenerOnDidOpen);
+
+
 }
 // this method is called when your extension is deactivated
 export function deactivate(context: vscode.ExtensionContext)
