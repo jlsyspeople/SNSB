@@ -151,7 +151,7 @@ export function activate(context: vscode.ExtensionContext)
                 {
                     switch (record.sys_class_name)
                     {
-                        case "Script Include":
+                        case "sys_script_include":
                             let include = wm.GetScriptInclude(e);
                             if (include)
                             {
