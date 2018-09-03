@@ -18,6 +18,7 @@ import { IsysSpWidget } from "./IsysSpWidget";
 export class Instance
 {
 
+
     //optimize performance
     constructor(Url?: URL, UserName?: string, Password?: string, workspaceStateManager?: WorkspaceStateManager)
     {
@@ -193,6 +194,37 @@ export class Instance
         });
     }
 
+
+    /**
+     * GetScriptInclude
+     * 
+     */
+    public GetScriptInclude(sysId: string): Promise<ScriptInclude>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this.ApiProxy)
+            {
+                var include = this.ApiProxy.GetScriptInclude(sysId);
+
+                if (include)
+                {
+                    include.then((res) =>
+                    {
+                        if (res.data.result)
+                        {
+                            resolve(new ScriptInclude(res.data.result));
+                        }
+                        else
+                        {
+                            reject(res.data);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
     private GetWidgetsUpStream(): Promise<Array<Widget>>
     {
         return new Promise((resolve, reject) =>
@@ -225,34 +257,9 @@ export class Instance
         });
     }
 
-    /**
-     * GetScriptInclude
-     * 
-     */
-    public GetScriptInclude(sysId: string): Promise<ScriptInclude>
+    GetWidget(sys_id: string): Promise<Widget>
     {
-        return new Promise((resolve, reject) =>
-        {
-            if (this.ApiProxy)
-            {
-                var include = this.ApiProxy.GetScriptInclude(sysId);
-
-                if (include)
-                {
-                    include.then((res) =>
-                    {
-                        if (res.data.result)
-                        {
-                            resolve(new ScriptInclude(res.data.result));
-                        }
-                        else
-                        {
-                            reject(res.data);
-                        }
-                    });
-                }
-            }
-        });
+        throw new Error("Method not implemented.");
     }
 
     /**

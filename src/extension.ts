@@ -151,7 +151,7 @@ export function activate(context: vscode.ExtensionContext)
                 {
                     switch (record.sys_class_name)
                     {
-                        case "sys_script_include":
+                        case "script_include":
                             let include = wm.GetScriptInclude(e);
                             if (include)
                             {
@@ -160,6 +160,21 @@ export function activate(context: vscode.ExtensionContext)
                                 {
                                     vscode.window.showInformationMessage(`${res.name} Saved`);
                                     wm.UpdateScriptInclude(res, e);
+                                }).catch((e) =>
+                                {
+                                    vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
+                                });
+                            }
+                            break;
+                        case "widget":
+                            let widget = wm.GetWidget(e);
+                            if (widget)
+                            {
+                                let p = instance.SaveWidget(widget);
+                                p.then((res) =>
+                                {
+                                    vscode.window.showInformationMessage(`${res.name} Saved`);
+                                    wm.UpdateWidget(res, e);
                                 }).catch((e) =>
                                 {
                                     vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
@@ -187,7 +202,7 @@ export function activate(context: vscode.ExtensionContext)
             {
                 switch (res.sys_class_name)
                 {
-                    case "Script Include":
+                    case "script_include":
                         let pr = instance.GetScriptInclude(res.sys_id);
 
                         pr.then((res) =>
@@ -195,7 +210,14 @@ export function activate(context: vscode.ExtensionContext)
                             wm.UpdateScriptInclude(res, e);
                         });
                         break;
+                    case "widget":
+                        let w = instance.GetWidget(res.sys_id);
 
+                        w.then((res) =>
+                        {
+                            wm.UpdateWidget(res, e);
+                        });
+                        break;
                     default:
                         console.warn("Record not Recognized");
                         break;
