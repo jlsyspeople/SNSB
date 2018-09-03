@@ -72,7 +72,7 @@ export class WorkspaceManager
         this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
         this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
 
-        vscode.window.showInformationMessage(`${record.name} have been updated`);
+        console.info(`${record.name} have been saved upstream`);
     }
 
     /**
