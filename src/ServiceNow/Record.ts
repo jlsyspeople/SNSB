@@ -18,7 +18,14 @@ export class Record implements IsysRecord
     private _sys_class_name: string;
     public get sys_class_name(): string
     {
-        return this._sys_class_name;
+        let className = this._sys_class_name.toLocaleLowerCase().replace(" ", "_");
+
+        if (className.startsWith("sys_"))
+        {
+            className = className.replace("sys_", "");
+        }
+
+        return className;
     }
 
     private _sys_id: string;
@@ -64,13 +71,13 @@ export class Record implements IsysRecord
     {
         //overwrite to JSON to ensure that json.stringify serializes with public property names and not the private ones. 
         return {
-            sys_class_name: this._sys_class_name,
-            sys_id: this._sys_id,
-            sys_policy: this._sys_policy,
-            sys_updated_on: this._sys_updated_on,
-            sys_created_on: this._sys_created_on,
-            sys_package: this._sys_package,
-            sys_scope: this._sys_scope
+            sys_class_name: this.sys_class_name,
+            sys_id: this.sys_id,
+            sys_policy: this.sys_policy,
+            sys_updated_on: this.sys_updated_on,
+            sys_created_on: this.sys_created_on,
+            sys_package: this.sys_package,
+            sys_scope: this.sys_scope
         };
     }
 }
