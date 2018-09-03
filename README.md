@@ -6,10 +6,12 @@ No ServiceNow configuration required.
 
 NB: Only Basic auth is available. 
 
+
+
 # Features
 
-* Work with Script Includes in you favourite IDE
-* Save to ServiceNow on FileSave
+* Work with Script Includes and widgets
+* Saves to ServiceNow on FileSave
 * On file open latest is downloaded from ServiceNow
 
 
@@ -19,12 +21,16 @@ the only way to currenty try the extension is to compile from the source.
 You need to have [Node.js](https://nodejs.org/en/) installed.
 
 
-
 1. Clone and open repository
 2. rebuild module dependencies using command "npm install" (make sure you are located in the workspace root)
 3. start debugger
 4. when debugging open a workspace
 5. invoke command: Connect to ServiceNow
+
+# Additional Extensions
+Extensions that go very well with this extension
+
+* [IntelliSense for CSS class names in HTML](https://marketplace.visualstudio.com/items?itemName=Zignd.html-css-class-completion) - for proper css intellisense i HTML. 
 
 
 ## Available commands
@@ -38,7 +44,12 @@ if the workspace is already associated with a ServiceNow instance only the passw
 ### Load Script Include
 Imports a script include into the workspace for edit.
 
-Read only and restricted script includes is available.
+Read only and restricted script includes is not available.
+
+### Load Widget
+imports a widget into the the workspace.
+
+Read only and restricted script includes is not available.
 
 ### Clear Instance
 clear workspace data. eg. cached records, urls, username.
