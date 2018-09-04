@@ -146,7 +146,7 @@ export class WorkspaceManager
     /**
      * GetScriptInclude, constructs a ScriptInclude object from workspace files
      */
-    public GetScriptInclude(textDocument: vscode.TextDocument): ServiceNow.ScriptInclude | undefined
+    private GetScriptInclude(textDocument: vscode.TextDocument): ServiceNow.ScriptInclude | undefined
     {
         //get options
         let serialized = this.ReadTextFile(this.GetPathRecordOptions(textDocument.uri));
@@ -208,7 +208,7 @@ export class WorkspaceManager
     }
 
     //returns a record from textdocument.
-    public GetRecord(textDocument: vscode.TextDocument): ServiceNow.Record | undefined
+    public GetRecord(textDocument: vscode.TextDocument): IsysRecord | undefined
     {
         try
         {
@@ -217,9 +217,17 @@ export class WorkspaceManager
 
             if (content)
             {
-                let deserialized = JSON.parse(content);
+                let deserialized = JSON.parse(content) as IsysRecord;
 
-                return new ServiceNow.Record(deserialized);
+                switch (deserialized.sys_class_name)
+                {
+                    case "script_include":
+                        return this.GetScriptInclude(textDocument);
+                    case "widget":
+                        return this.GetWidget(textDocument);
+                    default:
+                        break;
+                }
             }
         }
         catch (e)

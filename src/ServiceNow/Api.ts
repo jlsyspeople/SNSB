@@ -3,6 +3,7 @@ import { Instance } from './Instance';
 import { ScriptInclude } from './ScriptInclude';
 import { IsysRecord } from "./IsysRecord";
 import { Widget } from "./Widget";
+import { IsysScriptInclude } from "./IsysScriptInclude";
 
 export class Api
 {
@@ -236,7 +237,7 @@ export class Api
     /**
      * PatchScriptInclude
      */
-    public PatchScriptInclude(scriptInclude: ScriptInclude): Axios.AxiosPromise | undefined
+    public PatchScriptInclude(scriptInclude: IsysScriptInclude): Axios.AxiosPromise | undefined
     {
         if (this.HttpClient)
         {

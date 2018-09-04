@@ -172,42 +172,44 @@ export function activate(context: vscode.ExtensionContext)
             {
                 if (record)
                 {
-                    switch (record.sys_class_name)
-                    {
-                        case "script_include":
-                            let include = wm.GetScriptInclude(e);
-                            if (include)
-                            {
-                                let p = instance.SaveScriptInclude(include);
-                                p.then((res) =>
-                                {
-                                    vscode.window.showInformationMessage(`${res.name} Saved`);
-                                    wm.UpdateScriptInclude(res, e);
-                                }).catch((e) =>
-                                {
-                                    vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
-                                });
-                            }
-                            break;
-                        case "widget":
-                            let widget = wm.GetWidget(e);
-                            if (widget)
-                            {
-                                let p = instance.SaveWidget(widget);
-                                p.then((res) =>
-                                {
-                                    vscode.window.showInformationMessage(`${res.name} Saved`);
-                                    wm.UpdateWidget(res, e);
-                                }).catch((e) =>
-                                {
-                                    vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
-                                });
-                            }
-                            break;
-                        default:
-                            console.warn("Record not Recognized");
-                            break;
-                    }
+                    instance.SaveRecord(record);
+
+                    // switch (record.sys_class_name)
+                    // {
+                    //     case "script_include":
+                    //         let include = wm.GetScriptInclude(e);
+                    //         if (include)
+                    //         {
+                    //             let p = instance.SaveScriptInclude(include);
+                    //             p.then((res) =>
+                    //             {
+                    //                 vscode.window.showInformationMessage(`${res.name} Saved`);
+                    //                 wm.UpdateScriptInclude(res, e);
+                    //             }).catch((e) =>
+                    //             {
+                    //                 vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
+                    //             });
+                    //         }
+                    //         break;
+                    //     case "widget":
+                    //         let widget = wm.GetWidget(e);
+                    //         if (widget)
+                    //         {
+                    //             let p = instance.SaveWidget(widget);
+                    //             p.then((res) =>
+                    //             {
+                    //                 vscode.window.showInformationMessage(`${res.name} Saved`);
+                    //                 wm.UpdateWidget(res, e);
+                    //             }).catch((e) =>
+                    //             {
+                    //                 vscode.window.showErrorMessage(`Save Failed: ${e.error.message}`);
+                    //             });
+                    //         }
+                    //         break;
+                    //     default:
+                    //         console.warn("Record not Recognized");
+                    //         break;
+                    // }
                 }
             });
         }
@@ -218,33 +220,34 @@ export function activate(context: vscode.ExtensionContext)
         var recordLocal = wm.GetRecord(e);
         if (recordLocal)
         {
-
             var p = instance.IsLatest(recordLocal);
 
             p.then((res) =>
             {
-                switch (res.sys_class_name)
-                {
-                    case "script_include":
-                        let pr = instance.GetScriptInclude(res.sys_id);
+                //instance.SaveRecord(res);
 
-                        pr.then((res) =>
-                        {
-                            wm.UpdateScriptInclude(res, e);
-                        });
-                        break;
-                    case "widget":
-                        let w = instance.GetWidget(res.sys_id);
+                // switch (res.sys_class_name)
+                // {
+                //     case "script_include":
+                //         let pr = instance.GetScriptInclude(res.sys_id);
 
-                        w.then((res) =>
-                        {
-                            wm.UpdateWidget(res, e);
-                        });
-                        break;
-                    default:
-                        console.warn("Record not Recognized");
-                        break;
-                }
+                //         pr.then((res) =>
+                //         {
+                //             wm.UpdateScriptInclude(res, e);
+                //         });
+                //         break;
+                //     case "widget":
+                //         let w = instance.GetWidget(res.sys_id);
+
+                //         w.then((res) =>
+                //         {
+                //             wm.UpdateWidget(res, e);
+                //         });
+                //         break;
+                //     default:
+                //         console.warn("Record not Recognized");
+                //         break;
+                // }
             }).catch((e) =>
             {
                 console.info("local Record Up to date");

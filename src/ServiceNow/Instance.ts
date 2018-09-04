@@ -139,6 +139,9 @@ export class Instance
         }
     }
 
+
+
+
     /**
      * GetScriptIncludes
      * Returns all available script includes as an array.
@@ -421,7 +424,25 @@ export class Instance
 
     }
 
-    SaveWidget(widget: Widget): Promise<Widget>
+    public SaveRecord<T extends IsysRecord>(record: T): IsysRecord
+    {
+        switch (record.sys_class_name)
+        {
+            case "script_include":
+                console.log("test");
+                break;
+
+            case "widget":
+
+                break;
+            default:
+                break;
+        }
+
+        return new Record(record);
+    }
+
+    private SaveWidget(widget: Widget): Promise<Widget>
     {
         return new Promise((resolve, reject) =>
         {
@@ -454,7 +475,7 @@ export class Instance
      * returns an update script include object on resolve. 
      * Returns an error object on reject.
      */
-    public SaveScriptInclude(scriptInclude: ScriptInclude): Promise<ScriptInclude>
+    private SaveScriptInclude(scriptInclude: IsysScriptInclude): Promise<ScriptInclude>
     {
         return new Promise((resolve, reject) =>
         {
