@@ -5,7 +5,6 @@ import { IsysRecord } from "./IsysRecord";
 import { Widget } from "./Widget";
 import { IsysScriptInclude } from "./IsysScriptInclude";
 import { IsysSpWidget } from "./IsysSpWidget";
-import { AxiosResponse } from "axios";
 import { IServiceNowResponse } from "./IServiceNowResponse";
 
 export class Api
