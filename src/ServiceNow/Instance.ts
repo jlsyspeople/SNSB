@@ -206,7 +206,13 @@ export class Instance
             }
         });
     }
+    /**
+     * GetRecord
+     */
+    // public GetRecord(record: IsysRecord): IsysRecord
+    // {
 
+    // }
 
     /**
      * GetScriptInclude
@@ -320,12 +326,12 @@ export class Instance
      * resolves if newer is found upstream
      * rejects if latest
      */
-    public IsLatest(record: IsysRecord): Promise<Record>
+    public IsLatest(record: IsysRecord): Promise<IsysRecord>
     {
         return new Promise((resolve, reject) =>
         {
             //get upstream record
-            let p = this.GetRecord(record);
+            let p = this.GetRecordMetadata(record);
 
             p.then((res) =>
             {
@@ -396,16 +402,53 @@ export class Instance
     }
 
     /**
-     * GetRecord, returns record metadata from instance
-     * 
+     * GetRecord retrieves full record from instance
      */
-    private GetRecord(record: IsysRecord): Promise<Record>
+    public GetRecord(record: IsysRecord): Promise<IsysRecord>
     {
         return new Promise((resolve, reject) =>
         {
             if (this.ApiProxy)
             {
                 let p = this.ApiProxy.GetRecord(record);
+                if (p)
+                {
+                    p.then((res) =>
+                    {
+                        let r = new Record(res.data.result);
+                        switch (r.sys_class_name)
+                        {
+                            case "script_include":
+                                //@ts-ignore
+                                resolve(new ScriptInclude(res.data.result));
+                                break;
+                            case "widget":
+                                //@ts-ignore
+                                resolve(new Widget(res.data.result));
+                                break;
+                            default:
+                                break;
+                        }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
+                    });
+                }
+            }
+        });
+    }
+
+    /**
+     * GetRecord, returns record metadata from instance
+     * 
+     */
+    private GetRecordMetadata(record: IsysRecord): Promise<IsysRecord>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this.ApiProxy)
+            {
+                let p = this.ApiProxy.GetRecordMetadata(record);
                 if (p)
                 {
                     p.then((res) =>

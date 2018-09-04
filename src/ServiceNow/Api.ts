@@ -5,9 +5,12 @@ import { IsysRecord } from "./IsysRecord";
 import { Widget } from "./Widget";
 import { IsysScriptInclude } from "./IsysScriptInclude";
 import { IsysSpWidget } from "./IsysSpWidget";
+import { AxiosResponse } from "axios";
+import { IServiceNowResponse } from "./IServiceNowResponse";
 
 export class Api
 {
+
 
     private _SNApiEndpoint = "/api";
     private _SNTableSuffix: string = "/now/table";
@@ -157,9 +160,26 @@ export class Api
     }
 
     /**
+     * return a promise with the 
+     * @param record 
+     */
+    public GetRecord(record: IsysRecord): Axios.AxiosPromise<IServiceNowResponse> | undefined
+    {
+        switch (record.sys_class_name)
+        {
+            case "script_include":
+                return this.GetScriptInclude(record.sys_id);
+            case "widget":
+                return this.GetWidget(record.sys_id);
+            default:
+                console.error("Record not found:");
+                break;
+        }
+    }
+    /**
      * GetRecord, returns record from sys_metadata
      */
-    public GetRecord(record: IsysRecord): Axios.AxiosPromise | undefined
+    public GetRecordMetadata(record: IsysRecord): Axios.AxiosPromise | undefined
     {
         if (this.HttpClient)
         {

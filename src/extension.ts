@@ -199,7 +199,11 @@ export function activate(context: vscode.ExtensionContext)
             p.then((res) =>
             {
                 // instance.GetRecord
-                wm.UpdateRecord(res, e);
+                let r = instance.GetRecord(res);
+                r.then((res) =>
+                {
+                    wm.UpdateRecord(res, e);
+                });
             }).catch((e) =>
             {
                 console.info("local Record Up to date");

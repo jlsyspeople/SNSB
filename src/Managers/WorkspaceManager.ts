@@ -235,7 +235,10 @@ export class WorkspaceManager
         return split[split.length - 1];
     }
 
-    //returns a record from textdocument.
+    /**
+     * retrieves a record from workspace
+     * @param textDocument 
+     */
     public GetRecord(textDocument: vscode.TextDocument): IsysRecord | undefined
     {
         try

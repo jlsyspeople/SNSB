@@ -19,7 +19,7 @@ export class Record implements IsysRecord
     public get sys_class_name(): string
     {
         //Normalize sys_class_name
-        let className = this._sys_class_name.toLocaleLowerCase().replace(" ", "_");
+        let className = this._sys_class_name.toLowerCase().replace(" ", "_");
 
         let trimPrefix = ['sys_', 'sp_'];
 
