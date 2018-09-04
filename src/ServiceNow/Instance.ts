@@ -17,10 +17,6 @@ import { IsysSpWidget } from "./IsysSpWidget";
 //Instantiate to reset credentials
 export class Instance
 {
-
-
-
-    //optimize performance
     constructor(Url?: URL, UserName?: string, Password?: string, workspaceStateManager?: WorkspaceStateManager)
     {
         if (Url && UserName && Password && workspaceStateManager)
@@ -139,7 +135,21 @@ export class Instance
         }
     }
 
+    public SaveRecord<T extends IsysRecord>(record: T): Promise<IsysRecord> | undefined
+    {
+        switch (record.sys_class_name)
+        {
+            case "script_include":
+                //@ts-ignore
+                return this.SaveScriptInclude(record);
 
+            case "widget":
+                //@ts-ignore
+                return this.SaveWidget(record);
+            default:
+                break;
+        }
+    }
 
 
     /**
@@ -424,25 +434,9 @@ export class Instance
 
     }
 
-    public SaveRecord<T extends IsysRecord>(record: T): IsysRecord
-    {
-        switch (record.sys_class_name)
-        {
-            case "script_include":
-                console.log("test");
-                break;
 
-            case "widget":
 
-                break;
-            default:
-                break;
-        }
-
-        return new Record(record);
-    }
-
-    private SaveWidget(widget: Widget): Promise<Widget>
+    private SaveWidget(widget: IsysSpWidget): Promise<IsysSpWidget>
     {
         return new Promise((resolve, reject) =>
         {

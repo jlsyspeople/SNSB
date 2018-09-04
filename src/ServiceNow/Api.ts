@@ -4,6 +4,7 @@ import { ScriptInclude } from './ScriptInclude';
 import { IsysRecord } from "./IsysRecord";
 import { Widget } from "./Widget";
 import { IsysScriptInclude } from "./IsysScriptInclude";
+import { IsysSpWidget } from "./IsysSpWidget";
 
 export class Api
 {
@@ -219,7 +220,7 @@ export class Api
         }
     }
 
-    PatchWidget(widget: Widget): Axios.AxiosPromise | undefined
+    PatchWidget(widget: IsysSpWidget): Axios.AxiosPromise | undefined
     {
         if (this.HttpClient)
         {
@@ -228,7 +229,8 @@ export class Api
             let p = this.HttpClient.patch<Widget>(url, {
                 "script": widget.script,
                 "css": widget.css,
-                "client_script": widget.client_script
+                "client_script": widget.client_script,
+                'template': widget.template
             });
             return p;
         }

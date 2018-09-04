@@ -44,6 +44,23 @@ export class WorkspaceManager
         }
     }
 
+    public UpdateRecord(record: IsysRecord, textDocument: vscode.TextDocument): void
+    {
+        switch (record.sys_class_name)
+        {
+            case "script_include":
+                //@ts-ignore
+                this.UpdateScriptInclude(record, textDocument);
+                break;
+            case "widget":
+                //@ts-ignore
+                this.UpdateWidget(record, textDocument);
+            default:
+                break;
+        }
+    }
+
+
     /**
      * AddWidget
      */
@@ -71,7 +88,7 @@ export class WorkspaceManager
     /**
      * UpdateWidget
      */
-    public UpdateWidget(record: ServiceNow.Widget, textDocument: vscode.TextDocument): void
+    private UpdateWidget(record: ServiceNow.IsysSpWidget, textDocument: vscode.TextDocument): void
     {
         this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
         this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
@@ -84,7 +101,7 @@ export class WorkspaceManager
     /**
      * GetWidget
      */
-    public GetWidget(textDocument: vscode.TextDocument): ServiceNow.Widget | undefined
+    private GetWidget(textDocument: vscode.TextDocument): ServiceNow.Widget | undefined
     {
         //get options
         let serialized = this.ReadTextFile(this.GetPathRecordOptions(textDocument.uri));
@@ -100,13 +117,24 @@ export class WorkspaceManager
             let css = this.ReadTextFile(this.GetPathRecordCss(textDocument.uri));
             let html = this.ReadTextFile(this.GetPathRecordHtmlTemplate(textDocument.uri));
 
-            if (script && clientScript && css && html)
+            //take each individually in case some of are empty and valid.
+            if (script)
             {
                 deserialized.script = script;
+            }
+            if (clientScript)
+            {
                 deserialized.client_script = clientScript;
-                deserialized.css = css;
+            }
+            if (html)
+            {
                 deserialized.template = html;
             }
+            if (css)
+            {
+                deserialized.css = css;
+            }
+
             return deserialized;
         }
     }
@@ -135,7 +163,7 @@ export class WorkspaceManager
     /**
      * UpdateScriptInclude, updates a script include that have already been added.
      */
-    public UpdateScriptInclude(record: ServiceNow.ScriptInclude, textDocument: vscode.TextDocument): void
+    public UpdateScriptInclude(record: ServiceNow.IsysScriptInclude, textDocument: vscode.TextDocument): void
     {
         this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
         this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
