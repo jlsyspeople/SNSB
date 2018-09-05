@@ -201,18 +201,14 @@ export class Instance
                         {
                             reject("No elements Found");
                         }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
                     });
                 }
             }
         });
     }
-    /**
-     * GetRecord
-     */
-    // public GetRecord(record: IsysRecord): IsysRecord
-    // {
-
-    // }
 
     /**
      * GetScriptInclude
@@ -238,6 +234,9 @@ export class Instance
                         {
                             reject(res.data);
                         }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
                     });
                 }
             }
@@ -289,6 +288,9 @@ export class Instance
                         {
                             reject("No elements Found");
                         }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
                     });
                 }
             }
@@ -315,6 +317,9 @@ export class Instance
                         {
                             reject(res.data);
                         }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
                     });
                 }
             }
@@ -462,6 +467,9 @@ export class Instance
                         {
                             reject(res.data);
                         }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
                     });
                 }
                 else
@@ -500,6 +508,9 @@ export class Instance
                             //todo Turn api errors into a class?
                             reject(res.data);
                         }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
                     });
                 }
             }
@@ -533,6 +544,9 @@ export class Instance
                             //todo Turn api errors into a class?
                             reject(res.data);
                         }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
                     });
                 }
             }

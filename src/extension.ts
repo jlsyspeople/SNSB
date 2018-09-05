@@ -116,6 +116,9 @@ export function activate(context: vscode.ExtensionContext)
                         wm.AddScriptInclude(item, instance);
                     }
                 });
+            }).catch((er) =>
+            {
+                console.error(er);
             });
         }
         else
@@ -139,6 +142,9 @@ export function activate(context: vscode.ExtensionContext)
                         wm.AddWidget(item, instance);
                     }
                 });
+            }).catch((er) =>
+            {
+                console.error(er);
             });
         }
         else
@@ -203,6 +209,9 @@ export function activate(context: vscode.ExtensionContext)
                 r.then((res) =>
                 {
                     wm.UpdateRecord(res, e);
+                }).catch((er) =>
+                {
+                    console.error(er);
                 });
             }).catch((e) =>
             {
