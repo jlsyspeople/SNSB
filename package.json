@@ -2,7 +2,7 @@
     "name": "snsb",
     "displayName": "ServiceNow Script Bridge",
     "description": "Work with service now scripts in a real ide.",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "publisher": "ambs",
     "engines": {
         "vscode": "^1.21.0"
