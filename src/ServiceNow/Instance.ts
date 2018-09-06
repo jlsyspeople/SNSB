@@ -102,7 +102,140 @@ export class Instance
         this.TestConnection();
 
     }
+    public SaveRecord<T extends ISysMetadata>(record: T): Promise<ISysMetadata> | undefined
+    {
+        switch (record.sys_class_name)
+        {
+            case "script_include":
+                //@ts-ignore
+                return this.SaveScriptInclude(record);
 
+            case "widget":
+                //@ts-ignore
+                return this.SaveWidget(record);
+            default:
+                break;
+        }
+    }
+
+    /**
+         * GetScriptIncludes
+         * Returns all available script includes as an array.
+         */
+    public GetScriptIncludes(): Promise<Array<ScriptInclude>>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this._wsm)
+            {
+                let si = this._wsm.GetScriptIncludes();
+                if (si)
+                {
+                    resolve(si);
+                }
+            }
+            else
+            {
+                reject("No records found");
+            }
+        });
+    }
+
+    /**
+         * IsLatest 
+         * resolves if newer is found upstream
+         * rejects if latest
+         */
+    public IsLatest(record: ISysMetadata): Promise<ISysMetadata>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            //get upstream record
+            let p = this.GetRecordMetadata(record);
+
+            p.then((res) =>
+            {
+                //fix this comparison
+                if (res.sys_updated_on > record.sys_updated_on)
+                {
+                    //upstream newest
+                    resolve(res);
+                }
+                else
+                {
+                    reject(res);
+                }
+            }).catch((e) =>
+            {
+                console.error(e);
+                throw e;
+            });
+        });
+    }
+
+    /**
+     * RebuildCache
+     */
+    public RebuildCache()
+    {
+        this.Cache();
+    }
+
+    /**
+            * GetRecord retrieves full record from instance
+            */
+    public GetRecord(record: ISysMetadata): Promise<ISysMetadata>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this.ApiProxy)
+            {
+                let p = this.ApiProxy.GetRecord(record);
+                if (p)
+                {
+                    p.then((res) =>
+                    {
+                        let r = new Record(res.data.result);
+                        switch (r.sys_class_name)
+                        {
+                            case "script_include":
+                                //@ts-ignore
+                                resolve(new ScriptInclude(res.data.result));
+                                break;
+                            case "widget":
+                                //@ts-ignore
+                                resolve(new Widget(res.data.result));
+                                break;
+                            default:
+                                break;
+                        }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
+                    });
+                }
+            }
+        });
+    }
+
+    public GetWidgets(): Promise<Widget[]>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this._wsm)
+            {
+                let wi = this._wsm.GetWidgets();
+                if (wi)
+                {
+                    resolve(wi);
+                }
+            }
+            else
+            {
+                reject("No records found");
+            }
+        });
+    }
     /**
      * TestConnection
     
@@ -144,46 +277,6 @@ export class Instance
         }
     }
 
-    public SaveRecord<T extends ISysMetadata>(record: T): Promise<ISysMetadata> | undefined
-    {
-        switch (record.sys_class_name)
-        {
-            case "script_include":
-                //@ts-ignore
-                return this.SaveScriptInclude(record);
-
-            case "widget":
-                //@ts-ignore
-                return this.SaveWidget(record);
-            default:
-                break;
-        }
-    }
-
-
-    /**
-     * GetScriptIncludes
-     * Returns all available script includes as an array.
-     */
-    public GetScriptIncludes(): Promise<Array<ScriptInclude>>
-    {
-        return new Promise((resolve, reject) =>
-        {
-            if (this._wsm)
-            {
-                let si = this._wsm.GetScriptIncludes();
-                if (si)
-                {
-                    resolve(si);
-                }
-            }
-            else
-            {
-                reject("No records found");
-            }
-        });
-    }
-
     private GetScriptIncludesUpStream(): Promise<Array<ScriptInclude>>
     {
         return new Promise((resolve, reject) =>
@@ -213,57 +306,7 @@ export class Instance
         });
     }
 
-    /**
-     * GetScriptInclude
-     * 
-     */
-    public GetScriptInclude(sysId: string): Promise<ScriptInclude>
-    {
-        return new Promise((resolve, reject) =>
-        {
-            if (this.ApiProxy)
-            {
-                var include = this.ApiProxy.GetScriptInclude(sysId);
 
-                if (include)
-                {
-                    include.then((res) =>
-                    {
-                        if (res.data.result)
-                        {
-                            resolve(new ScriptInclude(res.data.result));
-                        }
-                        else
-                        {
-                            reject(res.data);
-                        }
-                    }).catch((er) =>
-                    {
-                        console.error(er);
-                    });
-                }
-            }
-        });
-    }
-
-    GetWidgets(): Promise<Widget[]>
-    {
-        return new Promise((resolve, reject) =>
-        {
-            if (this._wsm)
-            {
-                let wi = this._wsm.GetWidgets();
-                if (wi)
-                {
-                    resolve(wi);
-                }
-            }
-            else
-            {
-                reject("No records found");
-            }
-        });
-    }
 
     private GetWidgetsUpStream(): Promise<Array<Widget>>
     {
@@ -298,75 +341,6 @@ export class Instance
                 }
             }
         });
-    }
-
-    GetWidget(sys_id: string): Promise<Widget>
-    {
-        return new Promise((resolve, reject) =>
-        {
-            if (this.ApiProxy)
-            {
-                var widget = this.ApiProxy.GetWidget(sys_id);
-
-                if (widget)
-                {
-                    widget.then((res) =>
-                    {
-                        if (res.data.result)
-                        {
-                            resolve(new Widget(res.data.result));
-                        }
-                        else
-                        {
-                            reject(res.data);
-                        }
-                    }).catch((er) =>
-                    {
-                        console.error(er);
-                    });
-                }
-            }
-        });
-    }
-
-    /**
-     * IsLatest 
-     * resolves if newer is found upstream
-     * rejects if latest
-     */
-    public IsLatest(record: ISysMetadata): Promise<ISysMetadata>
-    {
-        return new Promise((resolve, reject) =>
-        {
-            //get upstream record
-            let p = this.GetRecordMetadata(record);
-
-            p.then((res) =>
-            {
-                //fix this comparison
-                if (res.sys_updated_on > record.sys_updated_on)
-                {
-                    //upstream newest
-                    resolve(res);
-                }
-                else
-                {
-                    reject(res);
-                }
-            }).catch((e) =>
-            {
-                console.error(e);
-                throw e;
-            });
-        });
-    }
-
-    /**
-     * RebuildCache
-     */
-    public RebuildCache()
-    {
-        this.Cache();
     }
 
     //will store objects in local storage
@@ -409,42 +383,7 @@ export class Instance
         }
     }
 
-    /**
-     * GetRecord retrieves full record from instance
-     */
-    public GetRecord(record: ISysMetadata): Promise<ISysMetadata>
-    {
-        return new Promise((resolve, reject) =>
-        {
-            if (this.ApiProxy)
-            {
-                let p = this.ApiProxy.GetRecord(record);
-                if (p)
-                {
-                    p.then((res) =>
-                    {
-                        let r = new Record(res.data.result);
-                        switch (r.sys_class_name)
-                        {
-                            case "script_include":
-                                //@ts-ignore
-                                resolve(new ScriptInclude(res.data.result));
-                                break;
-                            case "widget":
-                                //@ts-ignore
-                                resolve(new Widget(res.data.result));
-                                break;
-                            default:
-                                break;
-                        }
-                    }).catch((er) =>
-                    {
-                        console.error(er);
-                    });
-                }
-            }
-        });
-    }
+
 
     /**
      * GetRecord, returns record metadata from instance
