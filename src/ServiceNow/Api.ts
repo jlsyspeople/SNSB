@@ -4,34 +4,26 @@ import { ScriptInclude } from './ScriptInclude';
 import { IsysRecord } from "./IsysRecord";
 import { Widget } from "./Widget";
 import { IsysScriptInclude } from "./IsysScriptInclude";
-import { IsysSpWidget } from "./IsysSpWidget";
-import { IServiceNowResponse } from "./IServiceNowResponse";
+import { IsysWidget } from "./IsysWidget";
+import { IServiceNowResponse, IServiceNowResponseArray } from "./IServiceNowResponse";
+import { IsysProperty } from "./ISysProperty";
+import { SysProperty } from "./SysProperty";
 
 export class Api
 {
-
-
     private _SNApiEndpoint = "/api";
     private _SNTableSuffix: string = "/now/table";
     private _SNUserTable: string = `${this._SNTableSuffix}/sys_user`;
     private _SNMetaData: string = `${this._SNTableSuffix}/sys_metadata`;
     private _SNScriptIncludeTable: string = `${this._SNTableSuffix}/sys_script_include`;
     private _SNWidgetTable: string = `${this._SNTableSuffix}/sp_widget`;
+    private _SNSysProperties: string = `${this._SNTableSuffix}/sys_properties`;
+    private _Properties: Array<IsysProperty> = new Array<IsysProperty>();
 
-
-    private _HttpClient: Axios.AxiosInstance | undefined;
-    public get HttpClient(): Axios.AxiosInstance | undefined
-    {
-        return this._HttpClient;
-    }
-    public set HttpClient(v: Axios.AxiosInstance | undefined)
-    {
-        this._HttpClient = v;
-    }
 
     /**
-     * Setup class, Currently only basic auth.
-     */
+         * Setup class, Currently only basic auth.
+         */
     constructor(Instance: Instance, Password: string)
     {
         if (Instance.Url && Instance.UserName)
@@ -86,10 +78,52 @@ export class Api
         }
     }
 
+    /**
+     * return date format for connected instance
+     */
+    public get GetDateFormat(): string | undefined
+    {
+        let dateFormat = this._Properties.find((element) =>
+        {
+            return element.name === "glide.sys.date_format";
+        });
+
+        if (dateFormat)
+        {
+            return dateFormat.value;
+        }
+    }
+
+    /**
+     * return the Time format of connected instance
+     */
+    public get GetTimeFormat(): string | undefined
+    {
+        let dateFormat = this._Properties.find((element) =>
+        {
+            return element.name === "glide.sys.time_format";
+        });
+
+        if (dateFormat)
+        {
+            return dateFormat.value;
+        }
+    }
+
+    private _HttpClient: Axios.AxiosInstance | undefined;
+    public get HttpClient(): Axios.AxiosInstance | undefined
+    {
+        return this._HttpClient;
+    }
+    public set HttpClient(v: Axios.AxiosInstance | undefined)
+    {
+        this._HttpClient = v;
+    }
+
+
     // @ts-ignore
     private fixDateOnRecord(record)
     {
-
         if (record.sys_updated_on)
         {
             let date = record.sys_updated_on as string;
@@ -108,41 +142,106 @@ export class Api
 
     private getDateFromServiceNowTime(date: string): Date
     {
-        // yyyy-mm-dd hh:mm:ss
-        // 2018-08-06 12:51:39
-        // dd/mm/yyyy
-        // 06/08/2018
-        var dt = date.split(' ');
+        let dt = date.split(' ');
 
         let d = dt[0];
         let t = dt[1];
 
-        let dSplit;
+        //new Date(year,month,day,hour,minute,sec)
+        let DateFormat = this.GetDateFormat;
+        let TimeFormat = this.GetTimeFormat;
 
+        let f = new Date();
+
+        //if display value is used
+        if (DateFormat && TimeFormat)
+        {
+            f = this.GetDateFromFormat(d, DateFormat, t, TimeFormat);
+        }
+
+        //if system default is used.
+        let dtNow = new Date(Date.now());
+
+        if ((isNaN(f.getTime()) || f.getUTCFullYear() < (dtNow.getUTCFullYear() - 100) || f.getFullYear() > (dtNow.getUTCFullYear() + 100)) && TimeFormat)
+        {
+            f = this.GetDateFromFormat(d, "yyyy-MM-dd", t, TimeFormat);
+        }
+
+        return f;
+    }
+
+    private GetDateFromFormat(date: String, dateFormat: string, time: string, timeFormat: string): Date
+    {
         let year: number;
         let month: number;
         let day: number;
+        let hour: number;
+        let minute: number;
+        let sec: number;
 
-        if (d.includes("/"))
+        let indexYearFirst = dateFormat.indexOf("y");
+        let indexYearLast = dateFormat.lastIndexOf("y") + 1;
+
+        let indexMonthFirst = dateFormat.indexOf("M");
+        let indexMonthLast = dateFormat.lastIndexOf("M") + 1;
+
+        let indexDayFirst = dateFormat.indexOf("d");
+        let indexDaylast = dateFormat.lastIndexOf("d") + 1;
+
+        let indexHourFirst = timeFormat.indexOf("h");
+        let indexHourlast = timeFormat.lastIndexOf("h") + 1;
+
+        if (indexHourFirst === -1)
         {
-            dSplit = d.split('/');
-            year = Number.parseInt(dSplit[2]);
-            month = Number.parseInt(dSplit[1]) - 1;
-            day = Number.parseInt(dSplit[0]);
+            indexHourFirst = timeFormat.indexOf("H");
+            indexHourlast = timeFormat.lastIndexOf("H") + 1;
         }
-        else
+
+        let indeMinuteFirst = timeFormat.indexOf("m");
+        let indeMinutelast = timeFormat.lastIndexOf("m") + 1;
+
+        let indexSecondFirst = timeFormat.indexOf("s");
+        let indexSecondlast = timeFormat.lastIndexOf("s") + 1;
+
+        year = Number(date.substring(indexYearFirst, indexYearLast));
+        month = Number(date.substring(indexMonthFirst, indexMonthLast));
+        day = Number(date.substring(indexDayFirst, indexDaylast));
+
+        hour = Number(time.substring(indexHourFirst, indexHourlast));
+        minute = Number(time.substring(indeMinuteFirst, indeMinutelast));
+        sec = Number(time.substring(indexSecondFirst, indexSecondlast));
+
+        return new Date(Date.UTC(year, month - 1, day, hour, minute, sec));
+    }
+
+
+    /**
+     * GetSystemProperties
+     */
+    public GetSystemProperties(): Promise<Array<IsysProperty>>
+    {
+        return new Promise((resolve, reject) =>
         {
-            dSplit = d.split('-');
-            year = Number.parseInt(dSplit[0]);
-            month = Number.parseInt(dSplit[1]) - 1;
-            day = Number.parseInt(dSplit[2]);
-        }
+            if (this.HttpClient)
+            {
+                let url = `${this._SNSysProperties}?sysparm_query=nameSTARTSWITHglide.sys`;
+                let o = this.HttpClient.get<IServiceNowResponseArray>(url);
 
-        let tSplit = t.split(':');
+                o.then((res) =>
+                {
+                    res.data.result.forEach((element) =>
+                    {
+                        this._Properties.push(new SysProperty(<IsysProperty>element));
+                    });
+                    resolve(this._Properties);
+                });
+            }
+            else
+            {
+                reject("HTTPClient undefined");
+            }
+        });
 
-        let f = new Date(year, month, day, Number.parseInt(tSplit[0]), Number.parseInt(tSplit[1]), Number.parseInt(tSplit[2]));
-
-        return f;
     }
 
     /**
@@ -191,7 +290,7 @@ export class Api
      * GetWidgets
      * returns all widgets that are editable
      */
-    public GetWidgets(): Axios.AxiosPromise | undefined
+    public GetWidgets(): Axios.AxiosPromise<IServiceNowResponseArray> | undefined
     {
         if (this.HttpClient)
         {
@@ -217,7 +316,7 @@ export class Api
      * GetScriptIncludes lists all available script includes
      * only returns includes that are not restricted by sys policy
      */
-    public GetScriptIncludes(): Axios.AxiosPromise | undefined
+    public GetScriptIncludes(): Axios.AxiosPromise<IServiceNowResponseArray> | undefined
     {
         if (this.HttpClient)
         {
@@ -239,7 +338,7 @@ export class Api
         }
     }
 
-    PatchWidget(widget: IsysSpWidget): Axios.AxiosPromise | undefined
+    PatchWidget(widget: IsysWidget): Axios.AxiosPromise | undefined
     {
         if (this.HttpClient)
         {

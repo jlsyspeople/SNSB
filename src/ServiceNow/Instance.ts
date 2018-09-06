@@ -7,7 +7,7 @@ import { Record } from './Record';
 import { IsysRecord } from "./IsysRecord";
 import { WorkspaceStateManager } from "../Managers/all";
 import { Widget } from "./Widget";
-import { IsysSpWidget } from "./IsysSpWidget";
+import { IsysWidget } from "./IsysWidget";
 
 
 /*
@@ -26,6 +26,7 @@ export class Instance
     }
 
     private _wsm: WorkspaceStateManager | undefined;
+
 
     private _userName: string | undefined;
     public get UserName(): string | undefined
@@ -97,15 +98,16 @@ export class Instance
         this._wsm = wsm;
 
         this._ApiProxy = new Api(this, Password);
-        this.TestConnection();
-    }
 
+        this.TestConnection();
+
+    }
 
     /**
      * TestConnection
     
      */
-    public TestConnection()
+    private TestConnection(): void
     {
         this._hasRequiredRole = false;
         this._isPasswordValid = false;
@@ -118,9 +120,17 @@ export class Instance
                 {
                     if (res.data.result.length === 1)
                     {
+                        //@ts-ignore
+                        let i = this.ApiProxy.GetSystemProperties();
                         vscode.window.showInformationMessage("Connected");
-                        this.Cache();
                         this._isPasswordValid = true;
+                        if (i)
+                        {
+                            i.then((res) =>
+                            {
+                                this.Cache();
+                            });
+                        }
                     }
                     else
                     {
@@ -129,7 +139,6 @@ export class Instance
                 }).catch((res) =>
                 {
                     vscode.window.showErrorMessage(res.message);
-                    throw res;
                 });
             }
         }
@@ -189,18 +198,12 @@ export class Instance
 
                     include.then((res) =>
                     {
-                        if (res.data.result.length > 0)
+                        res.data.result.forEach((element) =>
                         {
-                            res.data.result.forEach((element: IsysScriptInclude) =>
-                            {
-                                result.push(new ScriptInclude(element));
-                            });
-                            resolve(result);
-                        }
-                        else
-                        {
-                            reject("No elements Found");
-                        }
+                            result.push(new ScriptInclude(<IsysScriptInclude>element));
+                        });
+                        resolve(result);
+
                     }).catch((er) =>
                     {
                         console.error(er);
@@ -278,9 +281,9 @@ export class Instance
                     {
                         if (res.data.result.length > 0)
                         {
-                            res.data.result.forEach((element: IsysSpWidget) =>
+                            res.data.result.forEach((element) =>
                             {
-                                result.push(new Widget(element));
+                                result.push(new Widget(<IsysWidget>element));
                             });
                             resolve(result);
                         }
@@ -487,7 +490,7 @@ export class Instance
 
 
 
-    private SaveWidget(widget: IsysSpWidget): Promise<IsysSpWidget>
+    private SaveWidget(widget: IsysWidget): Promise<IsysWidget>
     {
         return new Promise((resolve, reject) =>
         {

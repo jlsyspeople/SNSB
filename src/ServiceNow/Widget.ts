@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import { IsysSpWidget } from "./IsysSpWidget";
+import { IsysWidget } from "./IsysWidget";
 import { Record } from "./Record";
 
 
-export class Widget extends Record implements IsysSpWidget, vscode.QuickPickItem
+export class Widget extends Record implements IsysWidget, vscode.QuickPickItem
 {
-    constructor(w: IsysSpWidget)
+    constructor(w: IsysWidget)
     {
         super(w);
 

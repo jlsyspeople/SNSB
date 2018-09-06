@@ -88,7 +88,7 @@ export class WorkspaceManager
     /**
      * UpdateWidget
      */
-    private UpdateWidget(record: ServiceNow.IsysSpWidget, textDocument: vscode.TextDocument): void
+    private UpdateWidget(record: ServiceNow.IsysWidget, textDocument: vscode.TextDocument): void
     {
         this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
         this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);

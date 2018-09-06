@@ -5,3 +5,8 @@ export interface IServiceNowResponse
 {
     result: IsysRecord;
 }
+
+export interface IServiceNowResponseArray
+{
+    result: Array<IsysRecord>;
+}
