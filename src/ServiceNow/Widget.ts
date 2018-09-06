@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { ISpWidget } from "./ISpWidget";
 import { Record } from "./Record";
 
-
 export class Widget extends Record implements ISpWidget, vscode.QuickPickItem
 {
     constructor(w: ISpWidget)
