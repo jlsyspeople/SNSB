@@ -252,7 +252,7 @@ export class Api
     {
         if (this.HttpClient)
         {
-            let url = `${this._SNUserTable}?sysparm_limit=1&user_name=${Username}&sysparm_display_value=true`;
+            let url = `${this._SNUserTable}?sysparm_limit=1&user_name=${Username}`;
             return this.HttpClient.get(url);
         }
     }
@@ -294,7 +294,7 @@ export class Api
     {
         if (this.HttpClient)
         {
-            let url = `${this._SNWidgetTable}?internal=false&sys_policy=""&sysparm_display_value=true`;
+            let url = `${this._SNWidgetTable}?internal=false&sys_policy=""`;
             return this.HttpClient.get(url);
         }
     }
@@ -307,7 +307,7 @@ export class Api
     {
         if (this.HttpClient)
         {
-            let url = `${this._SNWidgetTable}/${sysId}?internal=false&sys_policy=""&sysparm_display_value=true`;
+            let url = `${this._SNWidgetTable}/${sysId}?internal=false&sys_policy=""`;
             return this.HttpClient.get(url);
         }
     }
@@ -320,7 +320,7 @@ export class Api
     {
         if (this.HttpClient)
         {
-            let url = `${this._SNScriptIncludeTable}?sys_policy=""&sysparm_display_value=true`;
+            let url = `${this._SNScriptIncludeTable}?sys_policy=""`;
             return this.HttpClient.get(url);
         }
     }
@@ -333,7 +333,7 @@ export class Api
     {
         if (this.HttpClient)
         {
-            let url = `${this._SNScriptIncludeTable}/${sysId}?sysparm_display_value=true`;
+            let url = `${this._SNScriptIncludeTable}/${sysId}`;
             return this.HttpClient.get(url);
         }
     }
