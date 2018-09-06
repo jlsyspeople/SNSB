@@ -1,7 +1,7 @@
 import * as fileSystem from 'fs';
 import * as vscode from 'vscode';
 import * as ServiceNow from '../ServiceNow/all';
-import { IsysRecord } from '../ServiceNow/all';
+import { ISysMetadata } from '../ServiceNow/all';
 
 export class WorkspaceManager
 {
@@ -44,7 +44,7 @@ export class WorkspaceManager
         }
     }
 
-    public UpdateRecord(record: IsysRecord, textDocument: vscode.TextDocument): void
+    public UpdateRecord(record: ISysMetadata, textDocument: vscode.TextDocument): void
     {
         switch (record.sys_class_name)
         {
@@ -88,7 +88,7 @@ export class WorkspaceManager
     /**
      * UpdateWidget
      */
-    private UpdateWidget(record: ServiceNow.IsysWidget, textDocument: vscode.TextDocument): void
+    private UpdateWidget(record: ServiceNow.ISpWidget, textDocument: vscode.TextDocument): void
     {
         this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
         this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
@@ -163,7 +163,7 @@ export class WorkspaceManager
     /**
      * UpdateScriptInclude, updates a script include that have already been added.
      */
-    public UpdateScriptInclude(record: ServiceNow.IsysScriptInclude, textDocument: vscode.TextDocument): void
+    public UpdateScriptInclude(record: ServiceNow.ISysScriptInclude, textDocument: vscode.TextDocument): void
     {
         this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
         this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
@@ -195,7 +195,7 @@ export class WorkspaceManager
         }
     }
 
-    private GetOptionsPretty(record: IsysRecord): string
+    private GetOptionsPretty(record: ISysMetadata): string
     {
         return JSON.stringify(record, null, 2);
     }
@@ -239,7 +239,7 @@ export class WorkspaceManager
      * retrieves a record from workspace
      * @param textDocument 
      */
-    public GetRecord(textDocument: vscode.TextDocument): IsysRecord | undefined
+    public GetRecord(textDocument: vscode.TextDocument): ISysMetadata | undefined
     {
         try
         {
@@ -248,7 +248,7 @@ export class WorkspaceManager
 
             if (content)
             {
-                let deserialized = JSON.parse(content) as IsysRecord;
+                let deserialized = JSON.parse(content) as ISysMetadata;
 
                 switch (deserialized.sys_class_name)
                 {
