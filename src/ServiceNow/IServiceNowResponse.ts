@@ -1,12 +1,12 @@
-import { IsysRecord } from "./IsysRecord";
+import { ISysMetadata } from "./ISysMetadata";
 
 //interface of response from table API
 export interface IServiceNowResponse
 {
-    result: IsysRecord;
+    result: ISysMetadata;
 }
 
 export interface IServiceNowResponseArray
 {
-    result: Array<IsysRecord>;
+    result: Array<ISysMetadata>;
 }

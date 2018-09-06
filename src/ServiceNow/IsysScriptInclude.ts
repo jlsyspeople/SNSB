@@ -1,12 +1,12 @@
-import {IsysRecord} from './IsysRecord';
+import { ISysMetadata } from "./ISysMetadata";
 
-export interface IsysScriptInclude extends IsysRecord
-    {
-        client_callable: boolean;
-        access: string;
-        active: boolean;
-        description: string;
-        script: string;
-        api_name: string;
-        name: string;
-    }
+export interface ISysScriptInclude extends ISysMetadata
+{
+    client_callable: boolean;
+    access: string;
+    active: boolean;
+    description: string;
+    script: string;
+    api_name: string;
+    name: string;
+}

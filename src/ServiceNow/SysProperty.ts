@@ -1,9 +1,9 @@
-import { IsysProperty } from "./ISysProperty";
+import { ISysProperty } from "./ISysProperty";
 import { Record } from "./Record";
 
-export class SysProperty extends Record implements IsysProperty
+export class SysProperty extends Record implements ISysProperty
 {
-    constructor(p: IsysProperty)
+    constructor(p: ISysProperty)
     {
         super(p);
         this.name = p.name;

@@ -1,10 +1,10 @@
-import { IsysRecord } from './IsysRecord';
+import { ISysMetadata } from './ISysMetadata';
 import { Relation } from './Relation';
 
 //class with base attributes of any record in ServiceNow.
-export class Record implements IsysRecord
+export class Record implements ISysMetadata
 {
-    constructor(o: IsysRecord)
+    constructor(o: ISysMetadata)
     {
         this._sys_class_name = o.sys_class_name;
         this._sys_id = o.sys_id;

@@ -1,5 +1,5 @@
-import { IsysRecord } from './IsysRecord';
-export interface IsysProperty extends IsysRecord
+import { ISysMetadata } from './ISysMetadata';
+export interface ISysProperty extends ISysMetadata
 {
     name: string;
     value: string;

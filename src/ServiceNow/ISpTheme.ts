@@ -1,6 +1,6 @@
-import { IsysRecord } from "./IsysRecord";
+import { ISysMetadata } from "./ISysMetadata";
 
-export interface IsysWidget extends IsysRecord
+export interface ISpTheme extends ISysMetadata
 {
     template: string;
     css: string;

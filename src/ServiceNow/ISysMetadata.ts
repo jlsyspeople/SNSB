@@ -1,7 +1,7 @@
-import {Relation} from './Relation';
+import { Relation } from './Relation';
 
 //Interface declaring fields used from sys_metadata
-export interface IsysRecord
+export interface ISysMetadata
 {
     sys_class_name: string;
     sys_id: string;

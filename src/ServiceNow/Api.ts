@@ -1,12 +1,12 @@
 import * as Axios from "axios";
 import { Instance } from './Instance';
 import { ScriptInclude } from './ScriptInclude';
-import { IsysRecord } from "./IsysRecord";
+import { ISysMetadata } from "./ISysMetadata";
 import { Widget } from "./Widget";
-import { IsysScriptInclude } from "./IsysScriptInclude";
-import { IsysWidget } from "./IsysWidget";
+import { ISysScriptInclude } from "./ISysScriptInclude";
+import { ISpWidget } from "./ISpWidget";
 import { IServiceNowResponse, IServiceNowResponseArray } from "./IServiceNowResponse";
-import { IsysProperty } from "./ISysProperty";
+import { ISysProperty } from "./ISysProperty";
 import { SysProperty } from "./SysProperty";
 
 export class Api
@@ -18,7 +18,7 @@ export class Api
     private _SNScriptIncludeTable: string = `${this._SNTableSuffix}/sys_script_include`;
     private _SNWidgetTable: string = `${this._SNTableSuffix}/sp_widget`;
     private _SNSysProperties: string = `${this._SNTableSuffix}/sys_properties`;
-    private _Properties: Array<IsysProperty> = new Array<IsysProperty>();
+    private _Properties: Array<ISysProperty> = new Array<ISysProperty>();
 
 
     /**
@@ -218,7 +218,7 @@ export class Api
     /**
      * GetSystemProperties
      */
-    public GetSystemProperties(): Promise<Array<IsysProperty>>
+    public GetSystemProperties(): Promise<Array<ISysProperty>>
     {
         return new Promise((resolve, reject) =>
         {
@@ -231,7 +231,7 @@ export class Api
                 {
                     res.data.result.forEach((element) =>
                     {
-                        this._Properties.push(new SysProperty(<IsysProperty>element));
+                        this._Properties.push(new SysProperty(<ISysProperty>element));
                     });
                     resolve(this._Properties);
                 });
@@ -261,7 +261,7 @@ export class Api
      * return a promise with the 
      * @param record 
      */
-    public GetRecord(record: IsysRecord): Axios.AxiosPromise<IServiceNowResponse> | undefined
+    public GetRecord(record: ISysMetadata): Axios.AxiosPromise<IServiceNowResponse> | undefined
     {
         switch (record.sys_class_name)
         {
@@ -277,7 +277,7 @@ export class Api
     /**
      * GetRecord, returns record from sys_metadata
      */
-    public GetRecordMetadata(record: IsysRecord): Axios.AxiosPromise | undefined
+    public GetRecordMetadata(record: ISysMetadata): Axios.AxiosPromise | undefined
     {
         if (this.HttpClient)
         {
@@ -338,7 +338,7 @@ export class Api
         }
     }
 
-    PatchWidget(widget: IsysWidget): Axios.AxiosPromise | undefined
+    PatchWidget(widget: ISpWidget): Axios.AxiosPromise | undefined
     {
         if (this.HttpClient)
         {
@@ -357,7 +357,7 @@ export class Api
     /**
      * PatchScriptInclude
      */
-    public PatchScriptInclude(scriptInclude: IsysScriptInclude): Axios.AxiosPromise | undefined
+    public PatchScriptInclude(scriptInclude: ISysScriptInclude): Axios.AxiosPromise | undefined
     {
         if (this.HttpClient)
         {

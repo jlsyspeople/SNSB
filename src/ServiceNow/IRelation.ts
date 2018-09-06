@@ -1,4 +1,4 @@
-export interface IsysRelation
+export interface IRelation
 {
     link: string;
     value: string;

@@ -2,12 +2,12 @@ import { URL } from "url";
 import { Api } from './Api';
 import * as vscode from 'vscode';
 import { ScriptInclude } from './ScriptInclude';
-import { IsysScriptInclude } from './IsysScriptInclude';
+import { ISysScriptInclude } from './ISysScriptInclude';
 import { Record } from './Record';
-import { IsysRecord } from "./IsysRecord";
+import { ISysMetadata } from "./ISysMetadata";
 import { WorkspaceStateManager } from "../Managers/all";
 import { Widget } from "./Widget";
-import { IsysWidget } from "./IsysWidget";
+import { ISpWidget } from "./ISpWidget";
 
 
 /*
@@ -144,7 +144,7 @@ export class Instance
         }
     }
 
-    public SaveRecord<T extends IsysRecord>(record: T): Promise<IsysRecord> | undefined
+    public SaveRecord<T extends ISysMetadata>(record: T): Promise<ISysMetadata> | undefined
     {
         switch (record.sys_class_name)
         {
@@ -200,7 +200,7 @@ export class Instance
                     {
                         res.data.result.forEach((element) =>
                         {
-                            result.push(new ScriptInclude(<IsysScriptInclude>element));
+                            result.push(new ScriptInclude(<ISysScriptInclude>element));
                         });
                         resolve(result);
 
@@ -283,7 +283,7 @@ export class Instance
                         {
                             res.data.result.forEach((element) =>
                             {
-                                result.push(new Widget(<IsysWidget>element));
+                                result.push(new Widget(<ISpWidget>element));
                             });
                             resolve(result);
                         }
@@ -334,7 +334,7 @@ export class Instance
      * resolves if newer is found upstream
      * rejects if latest
      */
-    public IsLatest(record: IsysRecord): Promise<IsysRecord>
+    public IsLatest(record: ISysMetadata): Promise<ISysMetadata>
     {
         return new Promise((resolve, reject) =>
         {
@@ -412,7 +412,7 @@ export class Instance
     /**
      * GetRecord retrieves full record from instance
      */
-    public GetRecord(record: IsysRecord): Promise<IsysRecord>
+    public GetRecord(record: ISysMetadata): Promise<ISysMetadata>
     {
         return new Promise((resolve, reject) =>
         {
@@ -450,7 +450,7 @@ export class Instance
      * GetRecord, returns record metadata from instance
      * 
      */
-    private GetRecordMetadata(record: IsysRecord): Promise<IsysRecord>
+    private GetRecordMetadata(record: ISysMetadata): Promise<ISysMetadata>
     {
         return new Promise((resolve, reject) =>
         {
@@ -490,7 +490,7 @@ export class Instance
 
 
 
-    private SaveWidget(widget: IsysWidget): Promise<IsysWidget>
+    private SaveWidget(widget: ISpWidget): Promise<ISpWidget>
     {
         return new Promise((resolve, reject) =>
         {
@@ -526,7 +526,7 @@ export class Instance
      * returns an update script include object on resolve. 
      * Returns an error object on reject.
      */
-    private SaveScriptInclude(scriptInclude: IsysScriptInclude): Promise<ScriptInclude>
+    private SaveScriptInclude(scriptInclude: ISysScriptInclude): Promise<ScriptInclude>
     {
         return new Promise((resolve, reject) =>
         {

@@ -1,8 +1,8 @@
-import { IsysRelation } from './IsysRelation';
+import { IRelation } from './IRelation';
 //related serviceNow entity
-export class Relation implements IsysRelation
+export class Relation implements IRelation
 {
-    constructor(r: IsysRelation)
+    constructor(r: IRelation)
     {
         this.link = r.link;
         this.value = r.value;
