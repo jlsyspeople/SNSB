@@ -1,7 +1,7 @@
 import * as fileSystem from 'fs';
 import * as vscode from 'vscode';
 import * as ServiceNow from '../ServiceNow/all';
-import { ISysMetadata } from '../ServiceNow/all';
+import { ISysMetadata, Instance, ScriptInclude, Widget } from '../ServiceNow/all';
 
 export class WorkspaceManager
 {
@@ -43,28 +43,73 @@ export class WorkspaceManager
             }
         }
     }
+    /**
+         * retrieves a record from workspace
+         * @param textDocument 
+         */
+    public GetRecord(textDocument: vscode.TextDocument): ISysMetadata | undefined
+    {
+        try
+        {
+            let optionsPath = this.GetPathRecordOptions(textDocument.uri);
+            let content = this.ReadTextFile(optionsPath);
+
+            if (content)
+            {
+                let deserialized = JSON.parse(content) as ISysMetadata;
+
+                switch (deserialized.sys_class_name)
+                {
+                    case "script_include":
+                        return this.GetScriptInclude(textDocument);
+                    case "widget":
+                        return this.GetWidget(textDocument);
+                    default:
+                        break;
+                }
+            }
+        }
+        catch (e)
+        {
+            console.error(e);
+        }
+    }
 
     public UpdateRecord(record: ISysMetadata, textDocument: vscode.TextDocument): void
     {
         switch (record.sys_class_name)
         {
             case "script_include":
-                //@ts-ignore
-                this.UpdateScriptInclude(record, textDocument);
+                this.UpdateScriptInclude(<ScriptInclude>record, textDocument);
                 break;
             case "widget":
-                //@ts-ignore
-                this.UpdateWidget(record, textDocument);
+                this.UpdateWidget(<Widget>record, textDocument);
             default:
                 break;
         }
     }
 
+    /**
+     * AddRecord
+     */
+    public AddRecord(record: ISysMetadata, instance: Instance)
+    {
+        switch (record.sys_class_name)
+        {
+            case "script_include":
+                this.AddScriptInclude(<ScriptInclude>record, instance);
+                break;
+            case "widget":
+                this.AddWidget(<Widget>record, instance);
+            default:
+                break;
+        }
+    }
 
     /**
      * AddWidget
      */
-    public AddWidget(record: ServiceNow.Widget, instance: ServiceNow.Instance): void
+    private AddWidget(record: ServiceNow.Widget, instance: ServiceNow.Instance): void
     {
         let instancePath = this.GetPathInstance(instance);
 
@@ -142,7 +187,7 @@ export class WorkspaceManager
     /**
      * AddScriptInclude, adds a new script include to the workspace
      */
-    public AddScriptInclude(record: ServiceNow.ScriptInclude, instance: ServiceNow.Instance): void
+    private AddScriptInclude(record: ServiceNow.ScriptInclude, instance: ServiceNow.Instance): void
     {
         let instancePath = this.GetPathInstance(instance);
 
@@ -163,7 +208,7 @@ export class WorkspaceManager
     /**
      * UpdateScriptInclude, updates a script include that have already been added.
      */
-    public UpdateScriptInclude(record: ServiceNow.ISysScriptInclude, textDocument: vscode.TextDocument): void
+    private UpdateScriptInclude(record: ServiceNow.ISysScriptInclude, textDocument: vscode.TextDocument): void
     {
         this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
         this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
@@ -235,37 +280,7 @@ export class WorkspaceManager
         return split[split.length - 1];
     }
 
-    /**
-     * retrieves a record from workspace
-     * @param textDocument 
-     */
-    public GetRecord(textDocument: vscode.TextDocument): ISysMetadata | undefined
-    {
-        try
-        {
-            let optionsPath = this.GetPathRecordOptions(textDocument.uri);
-            let content = this.ReadTextFile(optionsPath);
 
-            if (content)
-            {
-                let deserialized = JSON.parse(content) as ISysMetadata;
-
-                switch (deserialized.sys_class_name)
-                {
-                    case "script_include":
-                        return this.GetScriptInclude(textDocument);
-                    case "widget":
-                        return this.GetWidget(textDocument);
-                    default:
-                        break;
-                }
-            }
-        }
-        catch (e)
-        {
-            console.error(e);
-        }
-    }
 
     private GetPathRecordScript(uri: vscode.Uri): string
     {

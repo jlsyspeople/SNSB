@@ -113,7 +113,7 @@ export function activate(context: vscode.ExtensionContext)
                 {
                     if (item)
                     {
-                        wm.AddScriptInclude(item, instance);
+                        wm.AddRecord(item, instance);
                     }
                 });
             }).catch((er) =>
@@ -139,7 +139,7 @@ export function activate(context: vscode.ExtensionContext)
                 {
                     if (item)
                     {
-                        wm.AddWidget(item, instance);
+                        wm.AddRecord(item, instance);
                     }
                 });
             }).catch((er) =>
