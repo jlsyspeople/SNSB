@@ -257,6 +257,56 @@ export class Api
             return this.HttpClient.get(url);
         }
     }
+    /**
+     * Patch a record.
+     * 
+     */
+    public PatchRecord<T extends ISysMetadata>(record: T): Axios.AxiosPromise<IServiceNowResponse<ISysMetadata>> | undefined
+    {
+        if (this.HttpClient)
+        {
+            let url: string;
+            switch (record.sys_class_name)
+            {
+                case "script_include":
+                    //api/now/table/sys_script_include/e0085ebbdb171780e1b873dcaf96197e
+                    url = `${this._SNScriptIncludeTable}/${record.sys_id}`;
+
+                    //@ts-ignore
+                    let si = record as ISysScriptInclude;
+                    //trim data to speed up patch
+                    return this.HttpClient.patch<IServiceNowResponse<ISysScriptInclude>>(url, {
+                        "script": si.script
+                    });
+
+                case "widget":
+                    url = `${this._SNWidgetTable}/${record.sys_id}`;
+
+                    //@ts-ignore
+                    let widget = record as ISpWidget;
+                    //trim data to speed up patch
+                    return this.HttpClient.patch<IServiceNowResponse<ISpWidget>>(url, {
+                        "script": widget.script,
+                        "css": widget.css,
+                        "client_script": widget.client_script,
+                        'template': widget.template
+                    });
+                case "theme":
+                    //api/now/table/sys_script_include/e0085ebbdb171780e1b873dcaf96197e
+                    url = `${this._SNSpThemeTable}/${record.sys_id}`;
+                    //@ts-ignore
+                    let theme = record as ISpTheme;
+                    //trim data to speed up patch
+                    return this.HttpClient.patch<IServiceNowResponse<ISpTheme>>(url, {
+                        "script": theme.css_variables
+                    });
+
+                default:
+                    console.warn("PatchRecord: Record not Recognized");
+                    break;
+            }
+        }
+    }
 
     /**
      * return a promise with the 
@@ -264,17 +314,23 @@ export class Api
      */
     public GetRecord(record: ISysMetadata): Axios.AxiosPromise<IServiceNowResponse<ISysMetadata>> | undefined
     {
-        switch (record.sys_class_name)
+        if (this.HttpClient)
         {
-            case "script_include":
-                return this.GetScriptInclude(record.sys_id);
-            case "widget":
-                return this.GetWidget(record.sys_id);
-            default:
-                console.error("Record not found:");
-                break;
+            switch (record.sys_class_name)
+            {
+                case "script_include":
+                    return this.HttpClient.get<IServiceNowResponse<ISysScriptInclude>>(`${this._SNMetaData}/${record.sys_id}`);
+                case "widget":
+                    return this.HttpClient.get<IServiceNowResponse<ISpWidget>>(`${this._SNWidgetTable}/${record.sys_id}`);
+                case "theme":
+                    return this.HttpClient.get<IServiceNowResponse<ISpTheme>>(`${this._SNSpThemeTable}/${record.sys_package}`);
+                default:
+                    console.warn(`GetRecord: Record ${record.sys_class_name} not recognized`);
+                    break;
+            }
         }
     }
+
     /**
      * GetRecord, returns record from sys_metadata
      */
@@ -336,71 +392,6 @@ export class Api
         {
             let url = `${this._SNScriptIncludeTable}?sys_policy=""`;
             return this.HttpClient.get(url);
-        }
-    }
-
-    /**
-     * GetScriptInclude
-     * returns a single script include
-     */
-    public GetScriptInclude(sysId: string): Axios.AxiosPromise<IServiceNowResponse<ISysScriptInclude>> | undefined
-    {
-        if (this.HttpClient)
-        {
-            let url = `${this._SNScriptIncludeTable}/${sysId}`;
-            return this.HttpClient.get(url);
-        }
-    }
-
-
-    /**
-     * PatchRecord<T extends ISysMetadata>
-record:T     */
-    public PatchRecord<T extends ISysMetadata>(record: T): Axios.AxiosPromise<IServiceNowResponse<ISysMetadata>> | undefined
-    {
-        if (this.HttpClient)
-        {
-            let url: string;
-            switch (record.sys_class_name)
-            {
-                case "script_include":
-                    //api/now/table/sys_script_include/e0085ebbdb171780e1b873dcaf96197e
-                    url = `${this._SNScriptIncludeTable}/${record.sys_id}`;
-
-                    //@ts-ignore
-                    let si = record as ISysScriptInclude;
-                    //trim data to speed up patch
-                    return this.HttpClient.patch<IServiceNowResponse<ISysScriptInclude>>(url, {
-                        "script": si.script
-                    });
-
-                case "widget":
-                    url = `${this._SNWidgetTable}/${record.sys_id}`;
-
-                    //@ts-ignore
-                    let widget = record as ISpWidget;
-                    //trim data to speed up patch
-                    return this.HttpClient.patch<IServiceNowResponse<ISpWidget>>(url, {
-                        "script": widget.script,
-                        "css": widget.css,
-                        "client_script": widget.client_script,
-                        'template': widget.template
-                    });
-                case "theme":
-                    //api/now/table/sys_script_include/e0085ebbdb171780e1b873dcaf96197e
-                    url = `${this._SNSpThemeTable}/${record.sys_id}`;
-
-                    //@ts-ignore
-                    let theme = record as ISpTheme;
-                    //trim data to speed up patch
-                    return this.HttpClient.patch<IServiceNowResponse<ISpTheme>>(url, {
-                        "script": theme.css_variables
-                    });
-
-                default:
-                    console.warn("PatchRecord: Record not Recognized");
-                    break;
-            }
         }
     }
 }

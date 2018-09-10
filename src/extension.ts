@@ -211,6 +211,7 @@ export function activate(context: vscode.ExtensionContext)
                         p.then((res) =>
                         {
                             vscode.window.showInformationMessage(`Saved`);
+                            wm.UpdateRecord(res, e);
                         }).catch((er) =>
                         {
                             vscode.window.showErrorMessage(`Save Failed: ${er.error.message}`);

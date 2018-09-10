@@ -1,8 +1,7 @@
 import * as fileSystem from 'fs';
 import * as vscode from 'vscode';
 import * as ServiceNow from '../ServiceNow/all';
-import { ISysMetadata, Instance, ScriptInclude, Widget } from '../ServiceNow/all';
-import { Theme } from '../ServiceNow/Theme';
+import { ISysMetadata, Instance, ScriptInclude, ISysScriptInclude, ISpWidget, Theme, ISpTheme } from '../ServiceNow/all';
 
 export class WorkspaceManager
 {
@@ -45,9 +44,8 @@ export class WorkspaceManager
         }
     }
     /**
-         * retrieves a record from workspace
-         * @param textDocument 
-         */
+     * retrieves a record from workspace
+     */
     public GetRecord(textDocument: vscode.TextDocument): ISysMetadata | undefined
     {
         try
@@ -57,15 +55,64 @@ export class WorkspaceManager
 
             if (content)
             {
-                let deserialized = JSON.parse(content) as ISysMetadata;
+                let serialized = JSON.parse(content) as ISysMetadata;
 
-                switch (deserialized.sys_class_name)
+                switch (serialized.sys_class_name)
                 {
                     case "script_include":
-                        return this.GetScriptInclude(textDocument);
+                        let si = new ScriptInclude(<ISysScriptInclude>serialized);
+
+                        //get script
+                        let siScript = this.ReadTextFile(this.GetPathRecordScript(textDocument.uri));
+
+                        if (siScript)
+                        {
+                            si.script = siScript;
+                        }
+                        return si;
+
                     case "widget":
-                        return this.GetWidget(textDocument);
+                        let Widget = new ServiceNow.Widget(<ISpWidget>serialized);
+
+                        //get script
+                        let script = this.ReadTextFile(this.GetPathRecordScript(textDocument.uri));
+                        let clientScript = this.ReadTextFile(this.GetPathRecordClientScript(textDocument.uri));
+                        let css = this.ReadTextFile(this.GetPathRecordCss(textDocument.uri));
+                        let html = this.ReadTextFile(this.GetPathRecordHtmlTemplate(textDocument.uri));
+
+                        //take each individually empty can be valid.
+                        if (script)
+                        {
+                            Widget.script = script;
+                        }
+                        if (clientScript)
+                        {
+                            Widget.client_script = clientScript;
+                        }
+                        if (html)
+                        {
+                            Widget.template = html;
+                        }
+                        if (css)
+                        {
+                            Widget.css = css;
+                        }
+                        return Widget;
+
+                    case "theme":
+                        let t = new Theme(<ISpTheme>serialized);
+
+                        //get script
+                        let tCss = this.ReadTextFile(this.GetPathRecordCss(textDocument.uri));
+
+                        if (tCss)
+                        {
+                            t.css_variables = tCss;
+                        }
+                        return t;
+
                     default:
+                        console.warn(`GetRecord: Record ${serialized.sys_class_name} not recognized`);
                         break;
                 }
             }
@@ -76,16 +123,33 @@ export class WorkspaceManager
         }
     }
 
+    /**update record */
     public UpdateRecord(record: ISysMetadata, textDocument: vscode.TextDocument): void
     {
         switch (record.sys_class_name)
         {
             case "script_include":
-                this.UpdateScriptInclude(<ScriptInclude>record, textDocument);
+                this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
+                this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, (<ISysScriptInclude>record).script);
+                console.info(`${(<ISysScriptInclude>record).name} have been saved to workspace`);
                 break;
+
             case "widget":
-                this.UpdateWidget(<Widget>record, textDocument);
+                this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
+                this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, (<ISpWidget>record).script);
+                this.OverwriteFile(`${this.GetPathRecordClientScript(textDocument.uri)}`, (<ISpWidget>record).client_script);
+                this.OverwriteFile(`${this.GetPathRecordCss(textDocument.uri)}`, (<ISpWidget>record).css);
+                this.OverwriteFile(`${this.GetPathRecordHtmlTemplate(textDocument.uri)}`, (<ISpWidget>record).template);
+                console.info(`${(<ISpWidget>record).name} have been saved to workspace`);
+                break;
+
+            case "theme":
+                this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
+                this.OverwriteFile(`${this.GetPathRecordCss(textDocument.uri)}`, (<ISpTheme>record).css_variables);
+                break;
+
             default:
+                console.warn(`UpdateRecord: Record ${record.sys_class_name} not recognized`);
                 break;
         }
     }
@@ -95,169 +159,52 @@ export class WorkspaceManager
      */
     public AddRecord(record: ISysMetadata, instance: Instance)
     {
-        switch (record.sys_class_name)
-        {
-            case "script_include":
-                this.AddScriptInclude(<ScriptInclude>record, instance);
-                break;
-            case "widget":
-                this.AddWidget(<Widget>record, instance);
-            case "theme":
-                this.AddTheme(<Theme>record, instance);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private AddTheme(record: Theme, instance: Instance): any
-    {
         let instancePath = this.GetPathInstance(instance);
-
         if (instancePath)
         {
-            let widgetDir = this.GetPathRecord(record, instance);
-            this.CreateFolder(widgetDir);
+            let recordPath = this.GetPathRecord(record, instance);
+            let MetaDir: string;
+            let recordName: string;
 
-            let MetaDir = `${widgetDir}${this._delimiter}${record.name}`;
-            this.CreateFolder(MetaDir);
-
-            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.options.json`, this.GetOptionsPretty(record));
-            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.css`, record.css_variables);
-        }
-    }
-
-    /**
-     * AddWidget
-     */
-    private AddWidget(record: ServiceNow.Widget, instance: ServiceNow.Instance): void
-    {
-        let instancePath = this.GetPathInstance(instance);
-
-        if (instancePath)
-        {
-            let widgetDir = this.GetPathRecord(record, instance);
-            this.CreateFolder(widgetDir);
-
-            let MetaDir = `${widgetDir}${this._delimiter}${record.name}`;
-            this.CreateFolder(MetaDir);
-
-            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.options.json`, this.GetOptionsPretty(record));
-
-            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.client_script.js`, record.client_script);
-            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.server_script.js`, record.script);
-            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.css`, record.css);
-            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.html`, record.template);
-        }
-    }
-
-    /**
-     * UpdateWidget
-     */
-    private UpdateWidget(record: ServiceNow.ISpWidget, textDocument: vscode.TextDocument): void
-    {
-        this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
-        this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
-        this.OverwriteFile(`${this.GetPathRecordClientScript(textDocument.uri)}`, record.client_script);
-        this.OverwriteFile(`${this.GetPathRecordHtmlTemplate(textDocument.uri)}`, record.template);
-
-        console.info(`${record.name} have been saved to workspace`);
-    }
-
-    /**
-     * GetWidget
-     */
-    private GetWidget(textDocument: vscode.TextDocument): ServiceNow.Widget | undefined
-    {
-        //get options
-        let serialized = this.ReadTextFile(this.GetPathRecordOptions(textDocument.uri));
-
-        let deserialized: ServiceNow.Widget;
-        if (serialized)
-        {
-            deserialized = new ServiceNow.Widget(JSON.parse(serialized));
-
-            //get script
-            let script = this.ReadTextFile(this.GetPathRecordScript(textDocument.uri));
-            let clientScript = this.ReadTextFile(this.GetPathRecordClientScript(textDocument.uri));
-            let css = this.ReadTextFile(this.GetPathRecordCss(textDocument.uri));
-            let html = this.ReadTextFile(this.GetPathRecordHtmlTemplate(textDocument.uri));
-
-            //take each individually in case some of are empty and valid.
-            if (script)
+            switch (record.sys_class_name)
             {
-                deserialized.script = script;
+                case "script_include":
+                    this.CreateFolder(recordPath);
+                    recordName = (<ISysScriptInclude>record).name;
+                    MetaDir = `${recordPath}${this._delimiter}${recordName}`;
+                    this.CreateFolder(MetaDir);
+
+                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.options.json`, this.GetOptionsPretty(record));
+                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.server_script.js`, (<ISysScriptInclude>record).script);
+                    break;
+
+                case "widget":
+                    this.CreateFolder(recordPath);
+                    recordName = (<ISpWidget>record).name;
+                    MetaDir = `${recordPath}${this._delimiter}${recordName}`;
+                    this.CreateFolder(MetaDir);
+
+                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.options.json`, this.GetOptionsPretty(record));
+                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.client_script.js`, (<ISpWidget>record).client_script);
+                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.server_script.js`, (<ISpWidget>record).script);
+                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.css`, (<ISpWidget>record).css);
+                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.html`, (<ISpWidget>record).template);
+                    break;
+
+                case "theme":
+                    this.CreateFolder(recordPath);
+                    recordName = (<ScriptInclude>record).name;
+                    MetaDir = `${recordPath}${this._delimiter}${recordName}`;
+                    this.CreateFolder(MetaDir);
+
+                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.options.json`, this.GetOptionsPretty(record));
+                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.css`, (<ISpTheme>record).css_variables);
+                    break;
+
+                default:
+                    console.warn(`AddRecord: Record ${record.sys_class_name} not recognized`);
+                    break;
             }
-            if (clientScript)
-            {
-                deserialized.client_script = clientScript;
-            }
-            if (html)
-            {
-                deserialized.template = html;
-            }
-            if (css)
-            {
-                deserialized.css = css;
-            }
-
-            return deserialized;
-        }
-    }
-
-    /**
-     * AddScriptInclude, adds a new script include to the workspace
-     */
-    private AddScriptInclude(record: ServiceNow.ScriptInclude, instance: ServiceNow.Instance): void
-    {
-        let instancePath = this.GetPathInstance(instance);
-
-        if (instancePath)
-        {
-            let includedir = this.GetPathRecord(record, instance);
-            this.CreateFolder(includedir);
-
-            let MetaDir = `${includedir}${this._delimiter}${record.name}`;
-            this.CreateFolder(MetaDir);
-
-            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.options.json`, this.GetOptionsPretty(record));
-
-            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.server_script.js`, record.script);
-        }
-    }
-
-    /**
-     * UpdateScriptInclude, updates a script include that have already been added.
-     */
-    private UpdateScriptInclude(record: ServiceNow.ISysScriptInclude, textDocument: vscode.TextDocument): void
-    {
-        this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
-        this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, record.script);
-
-        console.info(`${record.name} have been saved to workspace`);
-    }
-
-    /**
-     * GetScriptInclude, constructs a ScriptInclude object from workspace files
-     */
-    private GetScriptInclude(textDocument: vscode.TextDocument): ServiceNow.ScriptInclude | undefined
-    {
-        //get options
-        let serialized = this.ReadTextFile(this.GetPathRecordOptions(textDocument.uri));
-
-        let deserialized: ServiceNow.ScriptInclude;
-        if (serialized)
-        {
-            deserialized = new ServiceNow.ScriptInclude(JSON.parse(serialized));
-
-            //get script
-            let script = this.ReadTextFile(this.GetPathRecordScript(textDocument.uri));
-
-            if (script)
-            {
-                deserialized.script = script;
-            }
-            return deserialized;
         }
     }
 
@@ -355,8 +302,6 @@ export class WorkspaceManager
             console.error(e);
         }
     }
-
-
 
     private GetPathWorkspace(): vscode.WorkspaceFolder | undefined
     {

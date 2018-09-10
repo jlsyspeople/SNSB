@@ -8,3 +8,5 @@ export * from './Record';
 export * from './Relation';
 export * from './ScriptInclude';
 export * from './Widget';
+export * from './ISpTheme';
+export * from './Theme';

@@ -128,7 +128,7 @@ export class Instance
                                 resolve(new Theme(<ISpTheme>res.data.result));
                                 break;
                             default:
-                                console.warn("SaveRecord: Record Not Recognized");
+                                console.warn(`SaveRecord:  Record ${r.sys_class_name} not recognized`);
                                 break;
                         }
                     }).catch((er) =>
@@ -162,8 +162,11 @@ export class Instance
                             case "widget":
                                 resolve(new Widget(<ISpWidget>res.data.result));
                                 break;
+                            case "theme":
+                                resolve(new Theme(<ISpTheme>res.data.result));
+                                break;
                             default:
-                                console.warn("GetRecord: Record Not Recognized");
+                                console.warn(`GetRecord: Record ${r.sys_class_name} not recognized`);
                                 break;
                         }
                     }).catch((er) =>
@@ -278,9 +281,6 @@ export class Instance
     {
         this.Cache();
     }
-
-
-
 
     /**
      * TestConnection
