@@ -6,5 +6,6 @@ export enum StateKeys
     user,
     password,
     scriptIncludes,
-    widget
+    widget,
+    theme
 }

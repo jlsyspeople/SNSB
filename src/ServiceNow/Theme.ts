@@ -1,12 +1,11 @@
 import { Record } from "./Record";
 import { ISpTheme } from "./ISpTheme";
 import { Relation } from "./Relation";
+import { QuickPickItem } from "vscode";
 
-export class Theme extends Record implements ISpTheme
+export class Theme extends Record implements ISpTheme, QuickPickItem
 {
-    /**
-     *
-     */
+
     constructor(t: ISpTheme)
     {
         super(t);
@@ -25,6 +24,21 @@ export class Theme extends Record implements ISpTheme
     footer_fixed: boolean;
     footer: string;
     header: Relation;
+
+    public get label(): string
+    {
+        return this.name;
+    }
+
+    public get description(): string
+    {
+        return "";
+    }
+
+    public get detail(): string | undefined
+    {
+        return "";
+    }
 
     public toJSON()
     {

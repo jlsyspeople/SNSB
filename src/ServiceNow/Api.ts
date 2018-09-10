@@ -2,12 +2,12 @@ import * as Axios from "axios";
 import { Instance } from './Instance';
 import { ScriptInclude } from './ScriptInclude';
 import { ISysMetadata } from "./ISysMetadata";
-import { Widget } from "./Widget";
 import { ISysScriptInclude } from "./ISysScriptInclude";
 import { ISpWidget } from "./ISpWidget";
-import { IServiceNowResponse, IServiceNowResponseArray } from "./IServiceNowResponse";
+import { IServiceNowResponse } from "./IServiceNowResponse";
 import { ISysProperty } from "./ISysProperty";
 import { SysProperty } from "./SysProperty";
+import { ISpTheme } from "./ISpTheme";
 
 export class Api
 {
@@ -18,6 +18,7 @@ export class Api
     private _SNScriptIncludeTable: string = `${this._SNTableSuffix}/sys_script_include`;
     private _SNWidgetTable: string = `${this._SNTableSuffix}/sp_widget`;
     private _SNSysProperties: string = `${this._SNTableSuffix}/sys_properties`;
+    private _SNSpThemeTable: string = `${this._SNTableSuffix}/sp_theme`;
     private _Properties: Array<ISysProperty> = new Array<ISysProperty>();
 
 
@@ -225,7 +226,7 @@ export class Api
             if (this.HttpClient)
             {
                 let url = `${this._SNSysProperties}?sysparm_query=nameSTARTSWITHglide.sys`;
-                let o = this.HttpClient.get<IServiceNowResponseArray>(url);
+                let o = this.HttpClient.get<IServiceNowResponse<Array<ISysProperty>>>(url);
 
                 o.then((res) =>
                 {
@@ -248,7 +249,7 @@ export class Api
      * GetUser
      * Returns a deserialized json object form the sys_user rest api. 
      */
-    public GetUser(Username: string): Axios.AxiosPromise | undefined
+    public GetUser(Username: string): Axios.AxiosPromise<IServiceNowResponse<Array<ISysMetadata>>> | undefined
     {
         if (this.HttpClient)
         {
@@ -261,7 +262,7 @@ export class Api
      * return a promise with the 
      * @param record 
      */
-    public GetRecord(record: ISysMetadata): Axios.AxiosPromise<IServiceNowResponse> | undefined
+    public GetRecord(record: ISysMetadata): Axios.AxiosPromise<IServiceNowResponse<ISysMetadata>> | undefined
     {
         switch (record.sys_class_name)
         {
@@ -277,7 +278,7 @@ export class Api
     /**
      * GetRecord, returns record from sys_metadata
      */
-    public GetRecordMetadata(record: ISysMetadata): Axios.AxiosPromise | undefined
+    public GetRecordMetadata(record: ISysMetadata): Axios.AxiosPromise<IServiceNowResponse<ISysMetadata>> | undefined
     {
         if (this.HttpClient)
         {
@@ -290,7 +291,7 @@ export class Api
      * GetWidgets
      * returns all widgets that are editable
      */
-    public GetWidgets(): Axios.AxiosPromise<IServiceNowResponseArray> | undefined
+    public GetWidgets(): Axios.AxiosPromise<IServiceNowResponse<Array<ISpWidget>>> | undefined
     {
         if (this.HttpClient)
         {
@@ -300,10 +301,23 @@ export class Api
     }
 
     /**
+     * GetWidgets
+     * returns all themes that are editable
+     */
+    public GetThemes(): Axios.AxiosPromise<IServiceNowResponse<Array<ISpTheme>>> | undefined
+    {
+        if (this.HttpClient)
+        {
+            let url = `${this._SNSpThemeTable}?sys_policy=""`;
+            return this.HttpClient.get(url);
+        }
+    }
+
+    /**
      * GetWidget
      * returns a single widget if it is editable.
      */
-    public GetWidget(sysId: string): Axios.AxiosPromise | undefined
+    public GetWidget(sysId: string): Axios.AxiosPromise<IServiceNowResponse<ISpWidget>> | undefined
     {
         if (this.HttpClient)
         {
@@ -316,7 +330,7 @@ export class Api
      * GetScriptIncludes lists all available script includes
      * only returns includes that are not restricted by sys policy
      */
-    public GetScriptIncludes(): Axios.AxiosPromise<IServiceNowResponseArray> | undefined
+    public GetScriptIncludes(): Axios.AxiosPromise<IServiceNowResponse<Array<ISysScriptInclude>>> | undefined
     {
         if (this.HttpClient)
         {
@@ -329,7 +343,7 @@ export class Api
      * GetScriptInclude
      * returns a single script include
      */
-    public GetScriptInclude(sysId: string): Axios.AxiosPromise | undefined
+    public GetScriptInclude(sysId: string): Axios.AxiosPromise<IServiceNowResponse<ISysScriptInclude>> | undefined
     {
         if (this.HttpClient)
         {
@@ -338,13 +352,13 @@ export class Api
         }
     }
 
-    PatchWidget(widget: ISpWidget): Axios.AxiosPromise | undefined
+    public PatchWidget(widget: ISpWidget): Axios.AxiosPromise<IServiceNowResponse<ISpWidget>> | undefined
     {
         if (this.HttpClient)
         {
             let url = `${this._SNWidgetTable}/${widget.sys_id}`;
             //trim data to speed up patch
-            let p = this.HttpClient.patch<Widget>(url, {
+            let p = this.HttpClient.patch<IServiceNowResponse<ISpWidget>>(url, {
                 "script": widget.script,
                 "css": widget.css,
                 "client_script": widget.client_script,

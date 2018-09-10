@@ -309,7 +309,7 @@ export class WorkspaceManager
         return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.options.json`;
     }
 
-    GetPathRecordCss(uri: vscode.Uri): string
+    private GetPathRecordCss(uri: vscode.Uri): string
     {
         let parentPath = this.GetPathParent(uri);
 
@@ -318,7 +318,7 @@ export class WorkspaceManager
         return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.css`;
     }
 
-    GetPathRecordHtmlTemplate(uri: vscode.Uri): string
+    private GetPathRecordHtmlTemplate(uri: vscode.Uri): string
     {
         let parentPath = this.GetPathParent(uri);
 

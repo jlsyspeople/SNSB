@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 import { StateKeys } from "./StateKeys";
 import { ScriptInclude, Widget } from "../ServiceNow/all";
+import { Theme } from '../ServiceNow/Theme';
 
 //get update and manage workpace state.
 export class WorkspaceStateManager
 {
+
     //todo add get and update functions.
     constructor(context: vscode.ExtensionContext)
     {
@@ -115,5 +117,15 @@ export class WorkspaceStateManager
     public GetWidgets(): Array<Widget> | undefined
     {
         return this._context.workspaceState.get(StateKeys.widget.toString());
+    }
+
+    public SetThemes(themes: Theme[]): void
+    {
+        this._context.workspaceState.update(StateKeys.theme.toString(), themes);
+    }
+
+    public GetThemes(): Array<Theme> | undefined
+    {
+        return this._context.workspaceState.get(StateKeys.theme.toString());
     }
 }

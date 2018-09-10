@@ -8,6 +8,8 @@ import { ISysMetadata } from "./ISysMetadata";
 import { WorkspaceStateManager } from "../Managers/all";
 import { Widget } from "./Widget";
 import { ISpWidget } from "./ISpWidget";
+import { Theme } from "./Theme";
+import { ISpTheme } from "./ISpTheme";
 
 
 /*
@@ -108,11 +110,11 @@ export class Instance
         {
             case "script_include":
                 //@ts-ignore
-                return this.SaveScriptInclude(record);
+                return this.SaveScriptInclude(<ISysScriptInclude>record);
 
             case "widget":
                 //@ts-ignore
-                return this.SaveWidget(record);
+                return this.SaveWidget(<ISpWidget>record);
             default:
                 break;
         }
@@ -140,6 +142,47 @@ export class Instance
             }
         });
     }
+
+    /**returns all cached widgets */
+    public GetWidgets(): Promise<Widget[]>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this._wsm)
+            {
+                let wi = this._wsm.GetWidgets();
+                if (wi)
+                {
+                    resolve(wi);
+                }
+            }
+            else
+            {
+                reject("No records found");
+            }
+        });
+    }
+
+    /**returns all cached widgets */
+    public GetThemes(): Promise<Theme[]>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this._wsm)
+            {
+                let t = this._wsm.GetThemes();
+                if (t)
+                {
+                    resolve(t);
+                }
+            }
+            else
+            {
+                reject("No records found");
+            }
+        });
+    }
+
 
     /**
          * IsLatest 
@@ -218,24 +261,7 @@ export class Instance
         });
     }
 
-    public GetWidgets(): Promise<Widget[]>
-    {
-        return new Promise((resolve, reject) =>
-        {
-            if (this._wsm)
-            {
-                let wi = this._wsm.GetWidgets();
-                if (wi)
-                {
-                    resolve(wi);
-                }
-            }
-            else
-            {
-                reject("No records found");
-            }
-        });
-    }
+
     /**
      * TestConnection
     
@@ -306,8 +332,6 @@ export class Instance
         });
     }
 
-
-
     private GetWidgetsUpStream(): Promise<Array<Widget>>
     {
         return new Promise((resolve, reject) =>
@@ -327,6 +351,41 @@ export class Instance
                             res.data.result.forEach((element) =>
                             {
                                 result.push(new Widget(<ISpWidget>element));
+                            });
+                            resolve(result);
+                        }
+                        else
+                        {
+                            reject("No elements Found");
+                        }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
+                    });
+                }
+            }
+        });
+    }
+
+    private GetThemesUpStream(): Promise<Array<Theme>>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this.ApiProxy)
+            {
+                var include = this.ApiProxy.GetThemes();
+
+                if (include)
+                {
+                    let result = new Array<Theme>();
+
+                    include.then((res) =>
+                    {
+                        if (res.data.result.length > 0)
+                        {
+                            res.data.result.forEach((element) =>
+                            {
+                                result.push(new Theme(<ISpTheme>element));
                             });
                             resolve(result);
                         }
@@ -379,6 +438,21 @@ export class Instance
             {
                 console.error(er);
                 wMsg.dispose();
+            });
+
+            let themes = this.GetThemesUpStream();
+            let tMsg = vscode.window.setStatusBarMessage("Loading Widgets", themes);
+            themes.then((res) =>
+            {
+                if (this._wsm)
+                {
+                    this._wsm.SetThemes(res);
+                }
+                tMsg.dispose();
+            }).catch((er) =>
+            {
+                console.error(er);
+                tMsg.dispose();
             });
         }
     }
