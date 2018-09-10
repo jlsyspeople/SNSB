@@ -41,15 +41,20 @@ if the workspace is already associated with a ServiceNow instance only the passw
 
 **NB: only Basic auth is supported**
 
-### Load Script Include
+### Add Script Include To Workspace
 Imports a script include into the workspace for edit.
 
 Read only and restricted script includes is not available.
 
-### Load Widget
+### Add Widget to Workspace
 imports a widget into the the workspace.
 
-Read only and restricted script includes is not available.
+Read only and restricted widgets is not available.
+
+### Add Theme to Workspace
+imports a theme into the workspace
+
+Read only and restricted themes is not available.
 
 ### Clear Instance
 clear workspace data. eg. cached records, urls, username.

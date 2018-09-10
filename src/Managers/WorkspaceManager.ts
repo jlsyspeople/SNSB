@@ -2,6 +2,7 @@ import * as fileSystem from 'fs';
 import * as vscode from 'vscode';
 import * as ServiceNow from '../ServiceNow/all';
 import { ISysMetadata, Instance, ScriptInclude, Widget } from '../ServiceNow/all';
+import { Theme } from '../ServiceNow/Theme';
 
 export class WorkspaceManager
 {
@@ -101,8 +102,28 @@ export class WorkspaceManager
                 break;
             case "widget":
                 this.AddWidget(<Widget>record, instance);
+            case "theme":
+                this.AddTheme(<Theme>record, instance);
+                break;
             default:
                 break;
+        }
+    }
+
+    private AddTheme(record: Theme, instance: Instance): any
+    {
+        let instancePath = this.GetPathInstance(instance);
+
+        if (instancePath)
+        {
+            let widgetDir = this.GetPathRecord(record, instance);
+            this.CreateFolder(widgetDir);
+
+            let MetaDir = `${widgetDir}${this._delimiter}${record.name}`;
+            this.CreateFolder(MetaDir);
+
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.options.json`, this.GetOptionsPretty(record));
+            this.CreateFile(`${MetaDir}${this._delimiter}${record.name}.css`, record.css_variables);
         }
     }
 
@@ -115,7 +136,7 @@ export class WorkspaceManager
 
         if (instancePath)
         {
-            let widgetDir = this.GetPathWidget(instance);
+            let widgetDir = this.GetPathRecord(record, instance);
             this.CreateFolder(widgetDir);
 
             let MetaDir = `${widgetDir}${this._delimiter}${record.name}`;
@@ -193,7 +214,7 @@ export class WorkspaceManager
 
         if (instancePath)
         {
-            let includedir = this.GetPathScriptInclude(instance);
+            let includedir = this.GetPathRecord(record, instance);
             this.CreateFolder(includedir);
 
             let MetaDir = `${includedir}${this._delimiter}${record.name}`;
@@ -256,17 +277,13 @@ export class WorkspaceManager
         }
     }
 
-    private GetPathScriptInclude(instanse: ServiceNow.Instance): string
+    /**returns the designated main path in workspace for any given record type */
+    private GetPathRecord<T extends ISysMetadata>(record: ISysMetadata, instance: Instance)
     {
-        let p = this.GetPathInstance(instanse);
-        return `${p}${this._delimiter}ScriptInclude`;
+        let p = this.GetPathInstance(instance);
+        return `${p}${this._delimiter}${record.sys_class_name}`;
     }
 
-    private GetPathWidget(instanse: ServiceNow.Instance): string
-    {
-        let p = this.GetPathInstance(instanse);
-        return `${p}${this._delimiter}Widget`;
-    }
 
     private GetPathParent(Uri: vscode.Uri): string
     {
@@ -279,8 +296,6 @@ export class WorkspaceManager
         let split = Uri.fsPath.split(`${this._delimiter}`);
         return split[split.length - 1];
     }
-
-
 
     private GetPathRecordScript(uri: vscode.Uri): string
     {

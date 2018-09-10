@@ -1,6 +1,5 @@
 import * as Axios from "axios";
 import { Instance } from './Instance';
-import { ScriptInclude } from './ScriptInclude';
 import { ISysMetadata } from "./ISysMetadata";
 import { ISysScriptInclude } from "./ISysScriptInclude";
 import { ISpWidget } from "./ISpWidget";
@@ -11,6 +10,7 @@ import { ISpTheme } from "./ISpTheme";
 
 export class Api
 {
+
     private _SNApiEndpoint = "/api";
     private _SNTableSuffix: string = "/now/table";
     private _SNUserTable: string = `${this._SNTableSuffix}/sys_user`;
@@ -352,36 +352,55 @@ export class Api
         }
     }
 
-    public PatchWidget(widget: ISpWidget): Axios.AxiosPromise<IServiceNowResponse<ISpWidget>> | undefined
-    {
-        if (this.HttpClient)
-        {
-            let url = `${this._SNWidgetTable}/${widget.sys_id}`;
-            //trim data to speed up patch
-            let p = this.HttpClient.patch<IServiceNowResponse<ISpWidget>>(url, {
-                "script": widget.script,
-                "css": widget.css,
-                "client_script": widget.client_script,
-                'template': widget.template
-            });
-            return p;
-        }
-    }
 
     /**
-     * PatchScriptInclude
-     */
-    public PatchScriptInclude(scriptInclude: ISysScriptInclude): Axios.AxiosPromise | undefined
+     * PatchRecord<T extends ISysMetadata>
+record:T     */
+    public PatchRecord<T extends ISysMetadata>(record: T): Axios.AxiosPromise<IServiceNowResponse<ISysMetadata>> | undefined
     {
         if (this.HttpClient)
         {
-            //api/now/table/sys_script_include/e0085ebbdb171780e1b873dcaf96197e
-            let url = `${this._SNScriptIncludeTable}/${scriptInclude.sys_id}`;
-            //trim data to speed up patch
-            let p = this.HttpClient.patch<ScriptInclude>(url, {
-                "script": scriptInclude.script
-            });
-            return p;
+            let url: string;
+            switch (record.sys_class_name)
+            {
+                case "script_include":
+                    //api/now/table/sys_script_include/e0085ebbdb171780e1b873dcaf96197e
+                    url = `${this._SNScriptIncludeTable}/${record.sys_id}`;
+
+                    //@ts-ignore
+                    let si = record as ISysScriptInclude;
+                    //trim data to speed up patch
+                    return this.HttpClient.patch<IServiceNowResponse<ISysScriptInclude>>(url, {
+                        "script": si.script
+                    });
+
+                case "widget":
+                    url = `${this._SNWidgetTable}/${record.sys_id}`;
+
+                    //@ts-ignore
+                    let widget = record as ISpWidget;
+                    //trim data to speed up patch
+                    return this.HttpClient.patch<IServiceNowResponse<ISpWidget>>(url, {
+                        "script": widget.script,
+                        "css": widget.css,
+                        "client_script": widget.client_script,
+                        'template': widget.template
+                    });
+                case "theme":
+                    //api/now/table/sys_script_include/e0085ebbdb171780e1b873dcaf96197e
+                    url = `${this._SNSpThemeTable}/${record.sys_id}`;
+
+                    //@ts-ignore
+                    let theme = record as ISpTheme;
+                    //trim data to speed up patch
+                    return this.HttpClient.patch<IServiceNowResponse<ISpTheme>>(url, {
+                        "script": theme.css_variables
+                    });
+
+                default:
+                    console.warn("PatchRecord: Record not Recognized");
+                    break;
+            }
         }
     }
 }

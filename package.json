@@ -23,11 +23,6 @@
                 "category": "snsb"
             },
             {
-                "command": "snsb.getInclude",
-                "title": "Load Script Include",
-                "category": "snsb"
-            },
-            {
                 "command": "snsb.clearWorkSpaceState",
                 "title": "Clear Instance",
                 "category": "snsb"
@@ -39,7 +34,17 @@
             },
             {
                 "command": "snsb.getWidget",
-                "title": "Load Widget",
+                "title": "Add Widget to Workspace",
+                "category": "snsb"
+            },
+            {
+                "command": "snsb.getInclude",
+                "title": "Add Script Include to Workspace",
+                "category": "snsb"
+            },
+            {
+                "command": "snsb.getTheme",
+                "title": "Add Theme To Workspace",
                 "category": "snsb"
             }
         ]

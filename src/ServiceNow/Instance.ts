@@ -106,18 +106,73 @@ export class Instance
     }
     public SaveRecord<T extends ISysMetadata>(record: T): Promise<ISysMetadata> | undefined
     {
-        switch (record.sys_class_name)
+        return new Promise((resolve, reject) =>
         {
-            case "script_include":
-                //@ts-ignore
-                return this.SaveScriptInclude(<ISysScriptInclude>record);
-
-            case "widget":
-                //@ts-ignore
-                return this.SaveWidget(<ISpWidget>record);
-            default:
-                break;
-        }
+            if (this.ApiProxy)
+            {
+                let p = this.ApiProxy.PatchRecord(record);
+                if (p)
+                {
+                    p.then((res) =>
+                    {
+                        let r = new Record(res.data.result);
+                        switch (r.sys_class_name)
+                        {
+                            case "script_include":
+                                resolve(new ScriptInclude(<ISysScriptInclude>res.data.result));
+                                break;
+                            case "widget":
+                                resolve(new Widget(<ISpWidget>res.data.result));
+                                break;
+                            case "theme":
+                                resolve(new Theme(<ISpTheme>res.data.result));
+                                break;
+                            default:
+                                console.warn("SaveRecord: Record Not Recognized");
+                                break;
+                        }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
+                    });
+                }
+            }
+        });
+    }
+    /**
+    * GetRecord retrieves full record from instance
+    */
+    public GetRecord(record: ISysMetadata): Promise<ISysMetadata>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if (this.ApiProxy)
+            {
+                let p = this.ApiProxy.GetRecord(record);
+                if (p)
+                {
+                    p.then((res) =>
+                    {
+                        let r = new Record(res.data.result);
+                        switch (r.sys_class_name)
+                        {
+                            case "script_include":
+                                resolve(new ScriptInclude(<ISysScriptInclude>res.data.result));
+                                break;
+                            case "widget":
+                                resolve(new Widget(<ISpWidget>res.data.result));
+                                break;
+                            default:
+                                console.warn("GetRecord: Record Not Recognized");
+                                break;
+                        }
+                    }).catch((er) =>
+                    {
+                        console.error(er);
+                    });
+                }
+            }
+        });
     }
 
     /**
@@ -185,10 +240,10 @@ export class Instance
 
 
     /**
-         * IsLatest 
-         * resolves if newer is found upstream
-         * rejects if latest
-         */
+     * IsLatest 
+     * resolves if newer is found upstream
+     * rejects if latest
+     */
     public IsLatest(record: ISysMetadata): Promise<ISysMetadata>
     {
         return new Promise((resolve, reject) =>
@@ -224,42 +279,7 @@ export class Instance
         this.Cache();
     }
 
-    /**
-            * GetRecord retrieves full record from instance
-            */
-    public GetRecord(record: ISysMetadata): Promise<ISysMetadata>
-    {
-        return new Promise((resolve, reject) =>
-        {
-            if (this.ApiProxy)
-            {
-                let p = this.ApiProxy.GetRecord(record);
-                if (p)
-                {
-                    p.then((res) =>
-                    {
-                        let r = new Record(res.data.result);
-                        switch (r.sys_class_name)
-                        {
-                            case "script_include":
-                                //@ts-ignore
-                                resolve(new ScriptInclude(res.data.result));
-                                break;
-                            case "widget":
-                                //@ts-ignore
-                                resolve(new Widget(res.data.result));
-                                break;
-                            default:
-                                break;
-                        }
-                    }).catch((er) =>
-                    {
-                        console.error(er);
-                    });
-                }
-            }
-        });
-    }
+
 
 
     /**
@@ -499,73 +519,5 @@ export class Instance
             }
         });
 
-    }
-
-
-
-    private SaveWidget(widget: ISpWidget): Promise<ISpWidget>
-    {
-        return new Promise((resolve, reject) =>
-        {
-            if (this.ApiProxy)
-            {
-                let patch = this.ApiProxy.PatchWidget(widget);
-                if (patch)
-                {
-                    patch.then((res) =>
-                    {
-                        if (res.data.result)
-                        {
-                            let widget = new Widget(res.data.result);
-                            resolve(widget);
-                        }
-                        else
-                        {
-                            //todo Turn api errors into a class?
-                            reject(res.data);
-                        }
-                    }).catch((er) =>
-                    {
-                        console.error(er);
-                    });
-                }
-            }
-        });
-    }
-
-    /**
-     * SetScriptInclude
-     * Saves script include to current instance
-     * returns an update script include object on resolve. 
-     * Returns an error object on reject.
-     */
-    private SaveScriptInclude(scriptInclude: ISysScriptInclude): Promise<ScriptInclude>
-    {
-        return new Promise((resolve, reject) =>
-        {
-            if (this.ApiProxy)
-            {
-                let patch = this.ApiProxy.PatchScriptInclude(scriptInclude);
-                if (patch)
-                {
-                    patch.then((res) =>
-                    {
-                        if (res.data.result)
-                        {
-                            let si = new ScriptInclude(res.data.result);
-                            resolve(si);
-                        }
-                        else
-                        {
-                            //todo Turn api errors into a class?
-                            reject(res.data);
-                        }
-                    }).catch((er) =>
-                    {
-                        console.error(er);
-                    });
-                }
-            }
-        });
     }
 }

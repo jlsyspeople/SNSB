@@ -153,6 +153,32 @@ export function activate(context: vscode.ExtensionContext)
         }
     });
 
+    let getTheme = vscode.commands.registerCommand("snsb.getTheme", () =>
+    {
+        if (instance.IsInitialized())
+        {
+            console.log("get includes");
+            let themes = instance.GetThemes();
+            themes.then((res) =>
+            {
+                vscode.window.showQuickPick(res).then((item) =>
+                {
+                    if (item)
+                    {
+                        wm.AddRecord(item, instance);
+                    }
+                });
+            }).catch((er) =>
+            {
+                console.error(er);
+            });
+        }
+        else
+        {
+            vscode.window.showErrorMessage("Connect to an instance");
+        }
+    });
+
     let clearWorkState = vscode.commands.registerCommand("snsb.clearWorkSpaceState", () =>
     {
         wsm.ClearState();
@@ -223,6 +249,7 @@ export function activate(context: vscode.ExtensionContext)
     context.subscriptions.push(connect);
     context.subscriptions.push(getInclude);
     context.subscriptions.push(getWidget);
+    context.subscriptions.push(getTheme);
     context.subscriptions.push(clearWorkState);
     context.subscriptions.push(rebuildCache);
     context.subscriptions.push(listenerOnDidSave);
