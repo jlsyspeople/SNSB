@@ -22,7 +22,6 @@ export function activate(context: vscode.ExtensionContext)
         instance = new ServiceNow.Instance();
     }
 
-    //no need for reinstatiation on each call. would also make it easier to store already retrieved entites. 
     console.info("SNSB Plugin Activated");
 
     //Configure instance object
@@ -180,6 +179,68 @@ export function activate(context: vscode.ExtensionContext)
         }
     });
 
+    let saveRecord = vscode.commands.registerCommand("snsb.saveRecord", (uri) =>
+    {
+        if (instance.IsInitialized())
+        {
+            let record = wm.GetRecord(uri);
+
+            if (record)
+            {
+                let o = instance.SaveRecord(record);
+
+                if (o)
+                {
+                    o.then((res) =>
+                    {
+                        vscode.window.showInformationMessage(`Saved`);
+                        wm.UpdateRecord(res, uri);
+                    }).catch((er) =>
+                    {
+                        vscode.window.showErrorMessage(`Save Failed: ${er.error.message}`);
+                    });
+                }
+            }
+        }
+        else
+        {
+            vscode.window.showErrorMessage("Connect to an instance");
+        }
+    });
+
+    let updateRecord = vscode.commands.registerCommand("snsb.updateRecord", (uri) =>
+    {
+        if (instance.IsInitialized())
+        {
+            var recordLocal = wm.GetRecord(uri);
+            if (recordLocal)
+            {
+                var p = instance.IsLatest(recordLocal);
+
+                p.then((res) =>
+                {
+                    let r = instance.GetRecord(res);
+                    r.then((res) =>
+                    {
+                        wm.UpdateRecord(res, uri);
+                    }).catch((er) =>
+                    {
+                        console.error(er);
+                    });
+                }).catch((e) =>
+                {
+                    console.info("local Record Up to date");
+                });
+            }
+        }
+        else
+        {
+            vscode.window.showErrorMessage("Connect to an instance");
+        }
+    });
+
+
+
     let clearWorkState = vscode.commands.registerCommand("snsb.clearWorkSpaceState", () =>
     {
         wsm.ClearState();
@@ -195,7 +256,7 @@ export function activate(context: vscode.ExtensionContext)
         config = vscode.workspace.getConfiguration("snsb");
         if (config.uploadOnSave)
         {
-            let record = wm.GetRecord(e);
+            let record = wm.GetRecord(e.uri);
 
             if (record)
             {
@@ -215,7 +276,7 @@ export function activate(context: vscode.ExtensionContext)
                             o.then((res) =>
                             {
                                 vscode.window.showInformationMessage(`Saved`);
-                                wm.UpdateRecord(res, e);
+                                wm.UpdateRecord(res, e.uri);
                             }).catch((er) =>
                             {
                                 vscode.window.showErrorMessage(`Save Failed: ${er.error.message}`);
@@ -232,7 +293,7 @@ export function activate(context: vscode.ExtensionContext)
         config = vscode.workspace.getConfiguration("snsb");
         if (config.addOnOpen)
         {
-            var recordLocal = wm.GetRecord(e);
+            var recordLocal = wm.GetRecord(e.uri);
             if (recordLocal)
             {
                 var p = instance.IsLatest(recordLocal);
@@ -242,7 +303,7 @@ export function activate(context: vscode.ExtensionContext)
                     let r = instance.GetRecord(res);
                     r.then((res) =>
                     {
-                        wm.UpdateRecord(res, e);
+                        wm.UpdateRecord(res, e.uri);
                     }).catch((er) =>
                     {
                         console.error(er);
@@ -259,6 +320,8 @@ export function activate(context: vscode.ExtensionContext)
     context.subscriptions.push(getInclude);
     context.subscriptions.push(getWidget);
     context.subscriptions.push(getTheme);
+    context.subscriptions.push(saveRecord);
+    context.subscriptions.push(updateRecord);
     context.subscriptions.push(clearWorkState);
     context.subscriptions.push(rebuildCache);
     context.subscriptions.push(listenerOnDidSave);

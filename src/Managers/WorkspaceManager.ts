@@ -46,11 +46,11 @@ export class WorkspaceManager
     /**
      * retrieves a record from workspace
      */
-    public GetRecord(textDocument: vscode.TextDocument): ISysMetadata | undefined
+    public GetRecord(uri: vscode.Uri): ISysMetadata | undefined
     {
         try
         {
-            let optionsPath = this.GetPathRecordOptions(textDocument.uri);
+            let optionsPath = this.GetPathRecordOptions(uri);
             let content = this.ReadTextFile(optionsPath);
 
             if (content)
@@ -63,7 +63,7 @@ export class WorkspaceManager
                         let si = new ScriptInclude(<ISysScriptInclude>serialized);
 
                         //get script
-                        let siScript = this.ReadTextFile(this.GetPathRecordScript(textDocument.uri));
+                        let siScript = this.ReadTextFile(this.GetPathRecordScript(uri));
 
                         if (siScript)
                         {
@@ -75,10 +75,10 @@ export class WorkspaceManager
                         let Widget = new ServiceNow.Widget(<ISpWidget>serialized);
 
                         //get script
-                        let script = this.ReadTextFile(this.GetPathRecordScript(textDocument.uri));
-                        let clientScript = this.ReadTextFile(this.GetPathRecordClientScript(textDocument.uri));
-                        let css = this.ReadTextFile(this.GetPathRecordCss(textDocument.uri));
-                        let html = this.ReadTextFile(this.GetPathRecordHtmlTemplate(textDocument.uri));
+                        let script = this.ReadTextFile(this.GetPathRecordScript(uri));
+                        let clientScript = this.ReadTextFile(this.GetPathRecordClientScript(uri));
+                        let css = this.ReadTextFile(this.GetPathRecordCss(uri));
+                        let html = this.ReadTextFile(this.GetPathRecordHtmlTemplate(uri));
 
                         //take each individually empty can be valid.
                         if (script)
@@ -103,7 +103,7 @@ export class WorkspaceManager
                         let t = new Theme(<ISpTheme>serialized);
 
                         //get script
-                        let tCss = this.ReadTextFile(this.GetPathRecordCss(textDocument.uri));
+                        let tCss = this.ReadTextFile(this.GetPathRecordCss(uri));
 
                         if (tCss)
                         {
@@ -124,28 +124,28 @@ export class WorkspaceManager
     }
 
     /**update record */
-    public UpdateRecord(record: ISysMetadata, textDocument: vscode.TextDocument): void
+    public UpdateRecord(record: ISysMetadata, uri: vscode.Uri): void
     {
         switch (record.sys_class_name)
         {
             case "script_include":
-                this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
-                this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, (<ISysScriptInclude>record).script);
+                this.OverwriteFile(`${this.GetPathRecordOptions(uri)}`, this.GetOptionsPretty(record));
+                this.OverwriteFile(`${this.GetPathRecordScript(uri)}`, (<ISysScriptInclude>record).script);
                 console.info(`${(<ISysScriptInclude>record).name} have been saved to workspace`);
                 break;
 
             case "widget":
-                this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
-                this.OverwriteFile(`${this.GetPathRecordScript(textDocument.uri)}`, (<ISpWidget>record).script);
-                this.OverwriteFile(`${this.GetPathRecordClientScript(textDocument.uri)}`, (<ISpWidget>record).client_script);
-                this.OverwriteFile(`${this.GetPathRecordCss(textDocument.uri)}`, (<ISpWidget>record).css);
-                this.OverwriteFile(`${this.GetPathRecordHtmlTemplate(textDocument.uri)}`, (<ISpWidget>record).template);
+                this.OverwriteFile(`${this.GetPathRecordOptions(uri)}`, this.GetOptionsPretty(record));
+                this.OverwriteFile(`${this.GetPathRecordScript(uri)}`, (<ISpWidget>record).script);
+                this.OverwriteFile(`${this.GetPathRecordClientScript(uri)}`, (<ISpWidget>record).client_script);
+                this.OverwriteFile(`${this.GetPathRecordCss(uri)}`, (<ISpWidget>record).css);
+                this.OverwriteFile(`${this.GetPathRecordHtmlTemplate(uri)}`, (<ISpWidget>record).template);
                 console.info(`${(<ISpWidget>record).name} have been saved to workspace`);
                 break;
 
             case "theme":
-                this.OverwriteFile(`${this.GetPathRecordOptions(textDocument.uri)}`, this.GetOptionsPretty(record));
-                this.OverwriteFile(`${this.GetPathRecordCss(textDocument.uri)}`, (<ISpTheme>record).css_variables);
+                this.OverwriteFile(`${this.GetPathRecordOptions(uri)}`, this.GetOptionsPretty(record));
+                this.OverwriteFile(`${this.GetPathRecordCss(uri)}`, (<ISpTheme>record).css_variables);
                 break;
 
             default:

@@ -11,8 +11,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:snsb.connect",
-        "onCommand:snsb.getInclude"
+        "onCommand:snsb.connect"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -30,11 +29,25 @@
                         "type": "boolean",
                         "default": true,
                         "description": "On open automatically add record to workspace record if outdated",
-                        "scope": "resource"
+                        "scope": "window"
                     }
                 }
             }
         ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "group": "snsb",
+                    "command": "snsb.updateRecord",
+                    "when": "resourceScheme == file"
+                },
+                {
+                    "group": "snsb",
+                    "command": "snsb.saveRecord",
+                    "when": "resourceScheme == file"
+                }
+            ]
+        },
         "commands": [
             {
                 "command": "snsb.connect",
@@ -54,6 +67,16 @@
             {
                 "command": "snsb.getWidget",
                 "title": "Add Widget to Workspace",
+                "category": "snsb"
+            },
+            {
+                "command": "snsb.saveRecord",
+                "title": "Save record to ServiceNow",
+                "category": "snsb"
+            },
+            {
+                "command": "snsb.updateRecord",
+                "title": "Update record from ServiceNow",
                 "category": "snsb"
             },
             {
