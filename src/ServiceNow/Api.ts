@@ -298,7 +298,7 @@ export class Api
                     let theme = record as ISpTheme;
                     //trim data to speed up patch
                     return this.HttpClient.patch<IServiceNowResponse<ISpTheme>>(url, {
-                        "script": theme.css_variables
+                        "css_variables": theme.css_variables
                     });
 
                 default:

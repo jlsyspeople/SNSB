@@ -204,11 +204,11 @@ export function activate(context: vscode.ExtensionContext)
             {
                 if (record)
                 {
-                    let p = instance.SaveRecord(record);
+                    let o = instance.SaveRecord(record);
 
-                    if (p)
+                    if (o)
                     {
-                        p.then((res) =>
+                        o.then((res) =>
                         {
                             vscode.window.showInformationMessage(`Saved`);
                             wm.UpdateRecord(res, e);
