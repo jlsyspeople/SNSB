@@ -46,6 +46,16 @@
                     "command": "snsb.saveRecord",
                     "when": "resourceScheme == file"
                 }
+            ],
+            "commandPalette": [
+                {
+                    "command": "snsb.saveRecord",
+                    "when": "false"
+                },
+                {
+                    "command": "snsb.updateRecord",
+                    "when": "false"
+                }
             ]
         },
         "commands": [
@@ -86,7 +96,7 @@
             },
             {
                 "command": "snsb.getTheme",
-                "title": "Add Theme To Workspace",
+                "title": "Add Theme to Workspace",
                 "category": "snsb"
             }
         ]
