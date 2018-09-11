@@ -188,7 +188,6 @@ export function activate(context: vscode.ExtensionContext)
             if (record)
             {
                 let o = instance.SaveRecord(record);
-
                 if (o)
                 {
                     o.then((res) =>
@@ -215,21 +214,13 @@ export function activate(context: vscode.ExtensionContext)
             var recordLocal = wm.GetRecord(uri);
             if (recordLocal)
             {
-                var p = instance.IsLatest(recordLocal);
-
-                p.then((res) =>
+                let r = instance.GetRecord(recordLocal);
+                r.then((res) =>
                 {
-                    let r = instance.GetRecord(res);
-                    r.then((res) =>
-                    {
-                        wm.UpdateRecord(res, uri);
-                    }).catch((er) =>
-                    {
-                        console.error(er);
-                    });
-                }).catch((e) =>
+                    wm.UpdateRecord(res, uri);
+                }).catch((er) =>
                 {
-                    console.info("local Record Up to date");
+                    console.error(er);
                 });
             }
         }
