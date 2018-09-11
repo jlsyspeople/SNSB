@@ -18,20 +18,7 @@ export class Record implements ISysMetadata
     private _sys_class_name: string;
     public get sys_class_name(): string
     {
-        //Normalize sys_class_name
-        let className = this._sys_class_name.toLowerCase().replace(" ", "_");
-
-        let trimPrefix = ['sys_', 'sp_'];
-
-        trimPrefix.forEach(element =>
-        {
-            if (className.startsWith(element))
-            {
-                className = className.replace(element, "");
-            }
-        });
-
-        return className;
+        return this._sys_class_name;
     }
 
     private _sys_id: string;

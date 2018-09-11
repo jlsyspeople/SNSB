@@ -118,13 +118,13 @@ export class Instance
                         let r = new Record(res.data.result);
                         switch (r.sys_class_name)
                         {
-                            case "script_include":
+                            case "sys_script_include":
                                 resolve(new ScriptInclude(<ISysScriptInclude>res.data.result));
                                 break;
-                            case "widget":
+                            case "sp_widget":
                                 resolve(new Widget(<ISpWidget>res.data.result));
                                 break;
-                            case "theme":
+                            case "sp_theme":
                                 resolve(new Theme(<ISpTheme>res.data.result));
                                 break;
                             default:
@@ -153,20 +153,19 @@ export class Instance
                 {
                     p.then((res) =>
                     {
-                        let r = new Record(res.data.result);
-                        switch (r.sys_class_name)
+                        switch (res.data.result.sys_class_name)
                         {
-                            case "script_include":
+                            case "sys_script_include":
                                 resolve(new ScriptInclude(<ISysScriptInclude>res.data.result));
                                 break;
-                            case "widget":
+                            case "sp_widget":
                                 resolve(new Widget(<ISpWidget>res.data.result));
                                 break;
-                            case "theme":
+                            case "sp_theme":
                                 resolve(new Theme(<ISpTheme>res.data.result));
                                 break;
                             default:
-                                console.warn(`GetRecord: Record ${r.sys_class_name} not recognized`);
+                                console.warn(`GetRecord: Record ${res.data.result.sys_class_name} not recognized`);
                                 break;
                         }
                     }).catch((er) =>

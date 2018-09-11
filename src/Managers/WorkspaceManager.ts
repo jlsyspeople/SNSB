@@ -59,7 +59,7 @@ export class WorkspaceManager
 
                 switch (serialized.sys_class_name)
                 {
-                    case "script_include":
+                    case "sys_script_include":
                         let si = new ScriptInclude(<ISysScriptInclude>serialized);
 
                         //get script
@@ -71,7 +71,7 @@ export class WorkspaceManager
                         }
                         return si;
 
-                    case "widget":
+                    case "sp_widget":
                         let Widget = new ServiceNow.Widget(<ISpWidget>serialized);
 
                         //get script
@@ -99,7 +99,7 @@ export class WorkspaceManager
                         }
                         return Widget;
 
-                    case "theme":
+                    case "sp_theme":
                         let t = new Theme(<ISpTheme>serialized);
 
                         //get script
@@ -128,13 +128,13 @@ export class WorkspaceManager
     {
         switch (record.sys_class_name)
         {
-            case "script_include":
+            case "sys_script_include":
                 this.OverwriteFile(`${this.GetPathRecordOptions(uri)}`, this.GetOptionsPretty(record));
                 this.OverwriteFile(`${this.GetPathRecordScript(uri)}`, (<ISysScriptInclude>record).script);
                 console.info(`${(<ISysScriptInclude>record).name} have been saved to workspace`);
                 break;
 
-            case "widget":
+            case "sp_widget":
                 this.OverwriteFile(`${this.GetPathRecordOptions(uri)}`, this.GetOptionsPretty(record));
                 this.OverwriteFile(`${this.GetPathRecordScript(uri)}`, (<ISpWidget>record).script);
                 this.OverwriteFile(`${this.GetPathRecordClientScript(uri)}`, (<ISpWidget>record).client_script);
@@ -143,7 +143,7 @@ export class WorkspaceManager
                 console.info(`${(<ISpWidget>record).name} have been saved to workspace`);
                 break;
 
-            case "theme":
+            case "sp_theme":
                 this.OverwriteFile(`${this.GetPathRecordOptions(uri)}`, this.GetOptionsPretty(record));
                 this.OverwriteFile(`${this.GetPathRecordCss(uri)}`, (<ISpTheme>record).css_variables);
                 break;
@@ -168,7 +168,7 @@ export class WorkspaceManager
 
             switch (record.sys_class_name)
             {
-                case "script_include":
+                case "sys_script_include":
                     this.CreateFolder(recordPath);
                     recordName = (<ISysScriptInclude>record).name;
                     MetaDir = `${recordPath}${this._delimiter}${recordName}`;
@@ -178,7 +178,7 @@ export class WorkspaceManager
                     this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.server_script.js`, (<ISysScriptInclude>record).script);
                     break;
 
-                case "widget":
+                case "sp_widget":
                     this.CreateFolder(recordPath);
                     recordName = (<ISpWidget>record).name;
                     MetaDir = `${recordPath}${this._delimiter}${recordName}`;
@@ -191,7 +191,7 @@ export class WorkspaceManager
                     this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.html`, (<ISpWidget>record).template);
                     break;
 
-                case "theme":
+                case "sp_theme":
                     this.CreateFolder(recordPath);
                     recordName = (<ScriptInclude>record).name;
                     MetaDir = `${recordPath}${this._delimiter}${recordName}`;

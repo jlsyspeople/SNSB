@@ -268,7 +268,7 @@ export class Api
             let url: string;
             switch (record.sys_class_name)
             {
-                case "script_include":
+                case "sys_script_include":
                     //api/now/table/sys_script_include/e0085ebbdb171780e1b873dcaf96197e
                     url = `${this._SNScriptIncludeTable}/${record.sys_id}`;
 
@@ -279,7 +279,7 @@ export class Api
                         "script": si.script
                     });
 
-                case "widget":
+                case "sp_widget":
                     url = `${this._SNWidgetTable}/${record.sys_id}`;
 
                     //@ts-ignore
@@ -291,7 +291,7 @@ export class Api
                         "client_script": widget.client_script,
                         'template': widget.template
                     });
-                case "theme":
+                case "sp_theme":
                     //api/now/table/sys_script_include/e0085ebbdb171780e1b873dcaf96197e
                     url = `${this._SNSpThemeTable}/${record.sys_id}`;
                     //@ts-ignore
@@ -316,14 +316,15 @@ export class Api
     {
         if (this.HttpClient)
         {
+            let sysid = record.sys_id;
             switch (record.sys_class_name)
             {
-                case "script_include":
-                    return this.HttpClient.get<IServiceNowResponse<ISysScriptInclude>>(`${this._SNMetaData}/${record.sys_id}`);
-                case "widget":
-                    return this.HttpClient.get<IServiceNowResponse<ISpWidget>>(`${this._SNWidgetTable}/${record.sys_id}`);
-                case "theme":
-                    return this.HttpClient.get<IServiceNowResponse<ISpTheme>>(`${this._SNSpThemeTable}/${record.sys_package}`);
+                case "sys_script_include":
+                    return this.HttpClient.get<IServiceNowResponse<ISysScriptInclude>>(`${this._SNScriptIncludeTable}/${sysid}`);
+                case "sp_widget":
+                    return this.HttpClient.get<IServiceNowResponse<ISpWidget>>(`${this._SNWidgetTable}/${sysid}`);
+                case "sp_theme":
+                    return this.HttpClient.get<IServiceNowResponse<ISpTheme>>(`${this._SNSpThemeTable}/${sysid}`);
                 default:
                     console.warn(`GetRecord: Record ${record.sys_class_name} not recognized`);
                     break;
