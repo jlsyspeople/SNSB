@@ -225,7 +225,7 @@ export class WorkspaceManager
     }
 
     /**returns the designated main path in workspace for any given record type */
-    private GetPathRecord<T extends ISysMetadata>(record: ISysMetadata, instance: Instance)
+    private GetPathRecord<T extends ISysMetadata>(record: T, instance: Instance)
     {
         let p = this.GetPathInstance(instance);
         return `${p}${this._delimiter}${record.sys_class_name}`;
