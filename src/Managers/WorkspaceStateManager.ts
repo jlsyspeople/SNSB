@@ -31,14 +31,6 @@ export class WorkspaceStateManager
     }
 
     /**
-     * ClearSensitive clears sensitive data from workspace state
-     */
-    public ClearSensitive(): void
-    {
-        this._context.workspaceState.update(StateKeys.password.toString(), new Object());
-    }
-
-    /**
      * HasInstanceInState
      */
     public HasInstanceInState(): boolean

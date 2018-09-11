@@ -13,6 +13,8 @@ export function activate(context: vscode.ExtensionContext)
 {
     const wm = new Managers.WorkspaceManager(context);
     const wsm = new Managers.WorkspaceStateManager(context);
+    let config: vscode.WorkspaceConfiguration;
+
 
     let instance: ServiceNow.Instance;
     if (wsm.HasInstanceInState)
@@ -157,7 +159,6 @@ export function activate(context: vscode.ExtensionContext)
     {
         if (instance.IsInitialized())
         {
-            console.log("get includes");
             let themes = instance.GetThemes();
             themes.then((res) =>
             {
@@ -191,59 +192,66 @@ export function activate(context: vscode.ExtensionContext)
 
     var listenerOnDidSave = vscode.workspace.onDidSaveTextDocument((e) =>
     {
-        let record = wm.GetRecord(e);
-
-        if (record)
+        config = vscode.workspace.getConfiguration("snsb");
+        if (config.uploadOnSave)
         {
-            let p = instance.IsLatest(record);
+            let record = wm.GetRecord(e);
 
-            p.then((res) =>
+            if (record)
             {
-                vscode.window.showWarningMessage(`Newer Version of record ${res.sys_id} Found on instance`);
-            }).catch((er) =>
-            {
-                if (record)
+                let p = instance.IsLatest(record);
+
+                p.then((res) =>
                 {
-                    let o = instance.SaveRecord(record);
-
-                    if (o)
+                    vscode.window.showWarningMessage(`Newer Version of record ${res.sys_id} Found on instance`);
+                }).catch((er) =>
+                {
+                    if (record)
                     {
-                        o.then((res) =>
+                        let o = instance.SaveRecord(record);
+
+                        if (o)
                         {
-                            vscode.window.showInformationMessage(`Saved`);
-                            wm.UpdateRecord(res, e);
-                        }).catch((er) =>
-                        {
-                            vscode.window.showErrorMessage(`Save Failed: ${er.error.message}`);
-                        });
+                            o.then((res) =>
+                            {
+                                vscode.window.showInformationMessage(`Saved`);
+                                wm.UpdateRecord(res, e);
+                            }).catch((er) =>
+                            {
+                                vscode.window.showErrorMessage(`Save Failed: ${er.error.message}`);
+                            });
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     });
 
     var listenerOnDidOpen = vscode.workspace.onDidOpenTextDocument((e) =>
     {
-        var recordLocal = wm.GetRecord(e);
-        if (recordLocal)
+        config = vscode.workspace.getConfiguration("snsb");
+        if (config.addOnOpen)
         {
-            var p = instance.IsLatest(recordLocal);
+            var recordLocal = wm.GetRecord(e);
+            if (recordLocal)
+            {
+                var p = instance.IsLatest(recordLocal);
 
-            p.then((res) =>
-            {
-                // instance.GetRecord
-                let r = instance.GetRecord(res);
-                r.then((res) =>
+                p.then((res) =>
                 {
-                    wm.UpdateRecord(res, e);
-                }).catch((er) =>
+                    let r = instance.GetRecord(res);
+                    r.then((res) =>
+                    {
+                        wm.UpdateRecord(res, e);
+                    }).catch((er) =>
+                    {
+                        console.error(er);
+                    });
+                }).catch((e) =>
                 {
-                    console.error(er);
+                    console.info("local Record Up to date");
                 });
-            }).catch((e) =>
-            {
-                console.info("local Record Up to date");
-            });
+            }
         }
     });
 
@@ -255,12 +263,8 @@ export function activate(context: vscode.ExtensionContext)
     context.subscriptions.push(rebuildCache);
     context.subscriptions.push(listenerOnDidSave);
     context.subscriptions.push(listenerOnDidOpen);
-
-
 }
 // this method is called when your extension is deactivated
 export function deactivate(context: vscode.ExtensionContext)
 {
-    const wsm = new Managers.WorkspaceStateManager(context);
-    wsm.ClearSensitive();
 }

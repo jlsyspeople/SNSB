@@ -16,6 +16,25 @@
     ],
     "main": "./out/extension",
     "contributes": {
+        "configuration": [
+            {
+                "title": "ServiceNow Scripting Bridge",
+                "properties": {
+                    "snsb.uploadOnSave": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Automatically upload record on save",
+                        "scope": "window"
+                    },
+                    "snsb.addOnOpen": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "On open automatically add record to workspace record if outdated",
+                        "scope": "resource"
+                    }
+                }
+            }
+        ],
         "commands": [
             {
                 "command": "snsb.connect",

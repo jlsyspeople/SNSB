@@ -65,3 +65,14 @@ make sure to reconnect to service and refresh records or reload vscode.
 rebuilds caches records. 
 
 if you missing a script in the list when trying to load one use this command to retreive all from instance.
+
+## Options
+### uploadOnSave
+Enable or disable automatic upload on save. 
+
+default: true
+
+### addOnOpen
+Enable or disable automatic import on document open if newer exists.
+
+default: true
