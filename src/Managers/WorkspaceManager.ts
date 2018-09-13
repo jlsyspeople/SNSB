@@ -187,7 +187,7 @@ export class WorkspaceManager
                     this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.options.json`, this.GetOptionsPretty(record));
                     this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.client_script.js`, (<ISpWidget>record).client_script);
                     this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.server_script.js`, (<ISpWidget>record).script);
-                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.css`, (<ISpWidget>record).css);
+                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.scss`, (<ISpWidget>record).css);
                     this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.html`, (<ISpWidget>record).template);
                     break;
 
@@ -198,7 +198,7 @@ export class WorkspaceManager
                     this.CreateFolder(MetaDir);
 
                     this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.options.json`, this.GetOptionsPretty(record));
-                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.css`, (<ISpTheme>record).css_variables);
+                    this.CreateFile(`${MetaDir}${this._delimiter}${recordName}.scss`, (<ISpTheme>record).css_variables);
                     break;
 
                 default:
@@ -277,7 +277,7 @@ export class WorkspaceManager
 
         let recordName = this.GetFileName(uri);
 
-        return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.css`;
+        return `${parentPath}${this._delimiter}${recordName.split('.')[0]}.scss`;
     }
 
     private GetPathRecordHtmlTemplate(uri: vscode.Uri): string
