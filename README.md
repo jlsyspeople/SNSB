@@ -10,9 +10,10 @@ NB: Only Basic auth is available.
 
 # Features
 
-* Work with Script Includes and widgets
+* Work with multiple ServicNow entities Script Includes, widgets
 * Saves to ServiceNow on FileSave
 * On file open latest is downloaded from ServiceNow
+* Intellisense for ServiceNow Class'.
 
 
 # Try it
@@ -31,6 +32,23 @@ You need to have [Node.js](https://nodejs.org/en/) installed.
 Extensions that go very well with this extension
 
 * [IntelliSense for CSS class names in HTML](https://marketplace.visualstudio.com/items?itemName=Zignd.html-css-class-completion) - for proper css intellisense i HTML. 
+
+
+## Supported Elements
+Records types currently supported. 
+
+* Script includes.
+* Service Portal Themes.
+* Service Portal widgets.
+
+## Intellisense
+Currently there is intellisense for the following API's.
+
+### Server API's
+
+* GlideRecord
+
+### Client API's
 
 
 ## Available commands
