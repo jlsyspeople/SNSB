@@ -11,6 +11,8 @@ import * as Managers from './Managers/all';
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext)
 {
+    console.info("SNSB Activated");
+
     const wm = new Managers.WorkspaceManager(context);
     const wsm = new Managers.WorkspaceStateManager(context);
     let config: vscode.WorkspaceConfiguration;
@@ -21,11 +23,11 @@ export function activate(context: vscode.ExtensionContext)
         instance = new ServiceNow.Instance();
     }
 
-    console.info("SNSB Plugin Activated");
-
     //Configure instance object
     let connect = vscode.commands.registerCommand('snsb.connect', () =>
     {
+        wm.ConfigureWorkspace(context);
+
         let option = new Object() as vscode.InputBoxOptions;
 
         if (wsm.HasInstanceInState())

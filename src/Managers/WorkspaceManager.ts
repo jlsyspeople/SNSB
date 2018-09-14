@@ -2,6 +2,7 @@ import * as fileSystem from 'fs';
 import * as vscode from 'vscode';
 import * as ServiceNow from '../ServiceNow/all';
 import { ISysMetadata, Instance, ScriptInclude, ISysScriptInclude, ISpWidget, Theme, ISpTheme } from '../ServiceNow/all';
+import { delimiter } from 'path';
 
 export class WorkspaceManager
 {
@@ -207,6 +208,51 @@ export class WorkspaceManager
             }
         }
     }
+
+    /**
+     * ConfigureWorkspace
+     */
+    public ConfigureWorkspace(context: vscode.ExtensionContext)
+    {
+        if (this.HasWorkspace)
+        {
+            let path = this.GetPathWorkspace();
+            if (path)
+            {
+                let fileNameSrvApi = "ServerSideAPI.d.ts";
+                // let fileNameCliApi = "ClientSideApi.d.ts";
+                //let fileNameJsConf = "jsconfig.json";
+
+                let pathWorkSpaceSrvApi = `${path.uri.fsPath}${this._delimiter}${fileNameSrvApi}`;
+                //let pathWorkSpaceJsConf = `${path.uri.fsPath}${this._delimiter}${fileNameJsConf}`;
+
+                let contentSrvApi = this.ReadTextFile(`${context.extensionPath}${this._delimiter}out${this._delimiter}config${this._delimiter}${fileNameSrvApi}`);
+                //let contentJsConf = this.ReadTextFile(`${context.extensionPath}${this._delimiter}out${this._delimiter}config${this._delimiter}${fileNameJsConf}`);
+                if (contentSrvApi)
+                {
+                    //file that should be overwritten
+                    if (this.FileExist(pathWorkSpaceSrvApi))
+                    {
+                        this.OverwriteFile(pathWorkSpaceSrvApi, contentSrvApi);
+                    }
+                    else
+                    {
+                        this.CreateFile(pathWorkSpaceSrvApi, contentSrvApi);
+                    }
+                }
+
+                //files that should not be overwritten
+                // if (contentJsConf)
+                // {
+                //     if (!this.FileExist(pathWorkSpaceJsConf))
+                //     {
+                //         this.CreateFile(pathWorkSpaceJsConf, contentJsConf);
+                //     }
+                // }
+            }
+        }
+    }
+
 
     private GetOptionsPretty(record: ISysMetadata): string
     {
