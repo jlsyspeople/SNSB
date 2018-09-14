@@ -16,7 +16,7 @@ NB: Only Basic auth is available.
 
 
 # Try it
-the only way to currenty try the extension is to compile from the source.
+the only way to currently try the extension is to compile from the source.
 
 You need to have [Node.js](https://nodejs.org/en/) installed.
 

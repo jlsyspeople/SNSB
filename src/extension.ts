@@ -15,7 +15,6 @@ export function activate(context: vscode.ExtensionContext)
     const wsm = new Managers.WorkspaceStateManager(context);
     let config: vscode.WorkspaceConfiguration;
 
-
     let instance: ServiceNow.Instance;
     if (wsm.HasInstanceInState)
     {
