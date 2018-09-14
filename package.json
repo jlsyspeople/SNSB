@@ -11,7 +11,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:snsb.connect"
+        "*"
     ],
     "main": "./out/extension",
     "contributes": {
