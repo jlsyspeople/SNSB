@@ -2,7 +2,6 @@ import * as fileSystem from 'fs';
 import * as vscode from 'vscode';
 import * as ServiceNow from '../ServiceNow/all';
 import { ISysMetadata, Instance, ScriptInclude, ISysScriptInclude, ISpWidget, Theme, ISpTheme } from '../ServiceNow/all';
-import { delimiter } from 'path';
 
 export class WorkspaceManager
 {

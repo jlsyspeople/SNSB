@@ -213,3 +213,271 @@ declare class GlideQueryCondition
     /**Appends a 2-or-3 parameter OR condition to an existing GlideQueryCondition. */
     addOrCondition(name: string, operation: string, value: object): GlideQueryCondition;
 }
+
+declare namespace sn_ws
+{
+    class RestMessagev2
+    {
+        /**
+         * Instantiates an empty RESTMessageV2 object. 
+         * When using an object instantiated this way, you must manually specify an HTTP method and endpoint.
+         */
+        constructor()
+        /**
+         * Instantiates a RESTMessageV2 object using information from a REST message record.
+         * You must have a REST message record defined before you can use this constructor.
+         * @param name The name of the REST message record.
+         * @param methodName The name of the HTTP method to use, such as GET or PUT.
+         */
+        constructor(name: string, methodName: string);
+        /**
+         * Sends the REST message to the endpoint.
+         */
+        execute(): RestResponseV2;
+
+        /**
+         * Sends the REST message to the endpoint asynchronously. The instance does not wait for a response from the web service provider when making asynchronous calls.
+         */
+        executeAsync(): RestResponseV2;
+
+        /**
+         * Returns the URL of the endpoint for the REST message.
+         */
+        getEndpoint(): string;
+
+        /**
+         * Returns the content of the REST message body.
+         */
+        getRequestBody(): string
+
+        /**
+         * Returns the value for an HTTP header specified in the REST message.
+         * By default, this method cannot return the value for a header set automatically by the system.
+         * @param headerName The request header you want to get the value for.
+         */
+        getRequestHeader(headerName: string): string
+
+        /**
+         * Returns HTTP headers that were set by the REST client and the associated values.
+         * This method does not return headers set automatically by the system
+         */
+        getRequestHeaders(): object;
+
+        /**
+         * Configures the REST message to save the returned response body as an attachment record.
+         * @param tableName Specify the table that contains the record you want to attach the saved file to.
+         * @param recordSysId Specify the sys_id of the record you want to attach the saved file to.
+         * @param fileName 	Specify the file name to give to the saved file.
+         */
+        saveResponseBodyAsAttachment(tableName: string, recordSysId: string, fileName: string): void;
+
+        /**
+         * Configure the REST message to save the returned response body as an encrypted attachment record.
+         * @param tableName Specify the table that contains the record you want to attach the saved file to.
+         * @param recordSysId Specify the sys_id of the record you want to attach the saved file to.
+         * @param fileName Specify the file name to give to the saved file.
+         * @param encryptContext Specify the sys_id of an encryption context. The saved file is encrypted using this context.
+         */
+        saveResponseBodyAsAttachment(tableName: string, recordSysId: string, fileName: string, encryptContext: string): void;
+
+        /**
+         * Sets the credentials for the REST message using an existing basic auth or OAuth 2.0 profile.
+         * @param type he type of authentication profile to use. Valid values are 'basic' to use basic authentication, or 'oauth2' to use OAuth 2.0.
+         * @param profileId he sys_id of an authentication profile record.
+         */
+        setAuthenticationProfile(type: string, profileId: string): void;
+
+        /**
+         * Sets basic authentication headers for the REST message.
+         * Setting security values using this method overrides basic authentication values defined for the REST message record.
+         * @param userName The username you want to use to authenticate the REST message.
+         * @param userPass The password for the specified user.
+         */
+        setBasicAuth(userName: string, userPass: string): void;
+
+        /**
+         * Associates outbound requests and the resulting response record in the ECC queue. This method only applies to REST messages sent through a MID Server.
+         * @param correlator A unique identifier
+         */
+        setEccCorrelator(correlator: string): void;
+
+        /**
+         * Overrides a value from the database by writing to the REST message payload. This method only applies to REST messages sent through a MID Server.
+         * @param name The name of the parameter, such as source.
+         * @param value The value to assign to the specified parameter.
+         */
+        setEccParameter(name: string, value: string): void;
+
+        /**
+         * Set the endpoint for the REST message.
+         * By default, the REST message uses the endpoint specified in the REST message record.
+         * @param endpoint The URL of the REST provider you want to interface with.
+         */
+        setEndpoint(endpoint: string): void;
+
+        /**
+         * The HTTP method this REST message performs, such as GET or PUT.
+         * @param method The HTTP method to perform.
+         */
+        setHttpMethod(method: string): void;
+
+        /**
+         * Sets the amount of time the REST message waits for a response from the web service provider before the request times out.
+         * @param timeoutMs The amount of time, in milliseconds, before the call to the REST provider times out.
+         */
+        setHttpTimeout(timeoutMs: number): void;
+
+        /**
+         * Set the log level for this message and the corresponding response.
+         * Setting a log level using the RESTMessageV2 API overrides the log level configured on the REST message record. 
+         * @param level The log level. Valid values are basic, elevated, and all.
+         */
+        setLogLevel(level: string): void;
+
+        /**
+         * Configures the REST message to communicate through a MID Server
+         * @param midServer The name of the MID Server to use. Your instance must have an active MID Server with the specified name.
+         */
+        setMIDServer(midServer: string): void;
+
+        /**
+         * Sets the mutual authentication protocol profile for the REST message.
+         * Setting a protocol profile using this method overrides the protocol profile selected for the REST message record.
+         * @param profileName The Name of the protocol profile to use for mutual authentication.
+         */
+        setMutualAuth(profileName: string): void;
+
+        /**
+         * Append a parameter to the end of the request URL with the form name=value.
+         * @param name The name of the URL parameter to pass.
+         * @param value The value to assign the URL parameter.
+         */
+        setQueryParameter(name: string, value: string): void;
+
+        /**
+         * Set the body content to send to the web service provider when using PUT or POST HTTP methods
+         * @param body The request body to send.
+         */
+        setRequestBody(body: string): void;
+
+        /**
+         * Sets the request body using an existing attachment record.
+         * @param attachmentSysId The sys_id of the Attachment [sys_attachment] record you want to send in this REST message.
+         */
+        setRequestBodyFromAttachment(attachmentSysId: string): void;
+
+        /**
+         * Set the body content of a PUT or POST message using a binary stream.
+         * @param stream The binary data to send, such as an attachment or a stream from a 3rd-party service.
+         */
+        setRequestBodyFromStream(stream: object): void;
+
+        /**
+         * Sets an HTTP header in the REST message to the specified value.
+         * @param name The name of the header.
+         * @param value The value to assign to the specified header.
+         */
+        setRequestHeader(name: string, value: string): void;
+
+        /**
+         * Override the default requestor profile for the REST message in order to retrieve an OAuth access token associated with a different requestor.
+         * This method applies only to REST messages configured to use OAuth 2.0 authentication
+         * @param requestorContext 
+         * @param requestorId 
+         */
+        setRequestorProfile(requestorContext: string, requestorId: string): void;
+
+        /**
+         * Sets a REST message function variable with the specified name from the REST message record to the specified value.
+         * @param name The name of the REST message variable. This parameter must be defined in the REST message record before you can assign a value to it.
+         * @param value The value to assign the variable.
+         */
+        setStringParameter(name: string, value: string): void;
+
+        /**
+         * Sets a REST message function variable with the specified name from the REST message record to the specified value.
+         * This method is equivalent to setStringParameter but does not escape XML reserved characters.
+         * @param name The name of the REST message variable. This parameter must be defined in the REST message record before you can assign a value to it.
+         * @param value The value to assign the variable.
+         */
+        setStringParameterNoEscape(name: string, value: string): void;
+    }
+
+    class RestResponseV2
+    {
+        /**
+         * The RESTResponseV2 API allows you to use the data returned by an outbound REST message in JavaScript code.
+         * A RESTResponseV2 object is returned by the RESTMessageV2 functions execute() and executeAsync().
+         */
+        constructor()
+        /**Return all headers contained in the response, including any duplicate headers. */
+        getAllHeader(): Array<GlideHTTPHeader>;
+
+        /**
+         * Get the content of the REST response body.
+         * Use this function when you want to get the request body as text content. Do not use this method when saving the response as a binary attachment. 
+         */
+        getBody(): string;
+
+        /**
+         * Returns all cookies included in the response.
+         */
+        getCookies(): Array<object>;
+
+        /**
+         * Get the numeric error code if there was an error during the REST transaction.
+         * This error code is specific to the Now Platform, it is not an HTTP error code.
+         */
+        getErrorCode(): number;
+
+        /**
+         * Get the error message if there was an error during the REST transaction.
+         */
+        getErrorMessage(): string;
+
+        /**
+         * Get the value for a specified header.
+         * @param name The name of the header that you want the value for, such as Set-Cookie.
+         */
+        getHeader(name: string): string;
+
+        /**
+         * Get all headers returned in the REST response and the associated values.
+         * If a header is present more than once in the response, such as a Set-Cookie header, this function returns only the last of the duplicate headers.
+         */
+        getHeaders(): object
+
+        /**
+         * Get the fully-resolved query sent to the REST endpoint.
+         * This query contains the endpoint URL as well as any values assigned to variables in the REST message.
+         * Use this method only with responses to direct requests.
+         * This method is not supported for requests sent asynchronously, or requests sent using a MID server.
+         */
+        getQueryString(): string;
+
+        /**
+         * Get the sys_id value of the attachment created from the response body content.
+         * Use this function when you want to perform additional operations with the new attachment record.
+         */
+        getResponseAttachmentSysid(): string
+
+        /**
+         * Get the numeric HTTP status code returned by the REST provider.
+         */
+        getStatusCode(): number
+
+        /**
+         * Indicate if there was an error during the REST transaction.
+         */
+        haveError(): boolean;
+
+        /**
+         * Set the amount of time the instance waits for a response from the web service provider.
+         * This method overrides the property glide.rest.outbound.ecc_response.timeout for this REST response.
+         * @param timeoutSecs The amount of time, in seconds, to wait for this response.
+         */
+        waitForResponse(timeoutSecs: number)
+    }
+
+    class GlideHTTPHeader { }
+}
