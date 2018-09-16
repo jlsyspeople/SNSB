@@ -47,6 +47,7 @@ Currently there is intellisense for the following API's.
 ### Server API's
 
 * GlideRecord
+* GlideSystem
 
 ### Client API's
 
