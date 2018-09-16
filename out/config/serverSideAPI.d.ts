@@ -292,6 +292,81 @@ declare class GlideUser
     savePreference(name: string, value: string): void;
 }
 
+declare class GlideSession
+{
+    /**
+     * No constructor.
+     * 
+     * retrieve with gs.getSession()
+     */
+    constructor();
+
+    /**
+     * Returns a session client value previously set with putClientData().
+     * 
+     * This method is used in a client script to retrieve data values that were set by a server script that used the putClientData() method.
+     * @param paramName Name of the client data to retrieve.
+     */
+    getClientData(paramName: string): string;
+
+    /**
+     * Sets a session client value that can be retrieved with getClientData(). This method is used in a server side script that runs when a form is created.
+     * @param paramName Name of the client data to set.
+     * @param paramValue Value of the client data.
+     */
+    putClientData(paramName: string, paramValue: string): void;
+
+    /**
+     * Returns the client IP address.
+     */
+    getClientIP(): string;
+
+    /**
+     * Returns the application currently selected in the application picker.
+     * 
+     * This method requires admin privileges.
+     */
+    getCurrentApplicationId(): string;
+
+    /**
+     * Returns the session's language code.
+     */
+    getLanguage(): string;
+
+    /**
+     * Returns the session token.
+     */
+    getSessionToken(): string;
+
+    /**
+     * Returns the name of the session's time zone.
+     */
+    getTimeZoneName(): string;
+
+    /**
+     * Returns the URL on the stack. Returns null if the stack is empty.
+     */
+    getUrlOnStack(): string;
+
+    /**
+     * Returns true if the user is impersonating another user.
+     */
+    isImpersonating(): boolean;
+
+    /**
+     * Returns true if the session is interactive.
+     * An interactive session is one that involves an end-user interacting with a user interface that then retrieves information from a server. 
+     */
+    isInteractive(): boolean;
+
+    /**
+     * Returns true if the user is logged in.
+     */
+    isLoggedIn(): boolean;
+
+
+}
+
 declare var gs: GlideSystem;
 
 declare class GlideSystem
@@ -591,7 +666,7 @@ declare class GlideSystem
     /**
      * Gets a reference to the current Glide session.
      */
-    getSession(): string;
+    getSession(): GlideSession;
 
     /**
      * Retrieves the GlideSession session ID.
