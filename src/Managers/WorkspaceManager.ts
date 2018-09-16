@@ -220,13 +220,13 @@ export class WorkspaceManager
             {
                 let fileNameSrvApi = "ServerSideAPI.d.ts";
                 // let fileNameCliApi = "ClientSideApi.d.ts";
-                //let fileNameJsConf = "jsconfig.json";
+                let fileNameJsConf = "jsconfig.json";
 
                 let pathWorkSpaceSrvApi = `${path.uri.fsPath}${this._delimiter}${fileNameSrvApi}`;
-                //let pathWorkSpaceJsConf = `${path.uri.fsPath}${this._delimiter}${fileNameJsConf}`;
+                let pathWorkSpaceJsConf = `${path.uri.fsPath}${this._delimiter}${fileNameJsConf}`;
 
                 let contentSrvApi = this.ReadTextFile(`${context.extensionPath}${this._delimiter}out${this._delimiter}config${this._delimiter}${fileNameSrvApi}`);
-                //let contentJsConf = this.ReadTextFile(`${context.extensionPath}${this._delimiter}out${this._delimiter}config${this._delimiter}${fileNameJsConf}`);
+                let contentJsConf = this.ReadTextFile(`${context.extensionPath}${this._delimiter}out${this._delimiter}config${this._delimiter}${fileNameJsConf}`);
                 if (contentSrvApi)
                 {
                     //file that should be overwritten
@@ -241,13 +241,13 @@ export class WorkspaceManager
                 }
 
                 //files that should not be overwritten
-                // if (contentJsConf)
-                // {
-                //     if (!this.FileExist(pathWorkSpaceJsConf))
-                //     {
-                //         this.CreateFile(pathWorkSpaceJsConf, contentJsConf);
-                //     }
-                // }
+                if (contentJsConf)
+                {
+                    if (!this.FileExist(pathWorkSpaceJsConf))
+                    {
+                        this.CreateFile(pathWorkSpaceJsConf, contentJsConf);
+                    }
+                }
             }
         }
     }
