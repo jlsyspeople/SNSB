@@ -212,6 +212,86 @@ declare class GlideQueryCondition
     addOrCondition(name: string, operation: string, value: object): GlideQueryCondition;
 }
 
+declare class GlideUser
+{
+    /**
+     * Does not have Constructor. 
+     * 
+     * Retrieve GlideUser object with gs.getUser().
+     */
+    constructor();
+
+    /**
+     * Returns the current user's company sys_id.
+     */
+    getCompanyID(): string;
+
+    /**
+     * Returns the current user's display name.
+     */
+    getDisplayName(): string;
+
+    /**
+     * Returns the user's email address.
+     */
+    getEmail(): string;
+
+    /**
+     * Returns the user's first name.
+     */
+    getFirstName(): string;
+
+    /**
+     * Gets the sys_id of the current user.
+     */
+    getID(): string;
+
+    /**
+     * Returns the user's last name.
+     */
+    getLastName(): string;
+
+    /**
+     * Returns the user ID, or login name, of the current user.
+     */
+    getName(): string;
+
+    /**
+     * Gets the specified user preference value for the current user.
+     * @param name The name of the preference.
+     */
+    getPreference(name: string): string;
+
+    /**
+     * Returns a list of roles that includes explicitly granted roles, inherited roles, and roles acquired by group membership.
+     */
+    getRoles(): Array<string>;
+
+    /**
+     * Returns the list of roles explicitly granted to the user.
+     */
+    getUserRoles(): Array<string>;
+
+    /**
+     * Determines if the current user has the specified role.
+     * @param role Role to check
+     */
+    hasRole(role: string): boolean;
+
+    /**
+     * Determines if the current user is a member of the specified group.
+     * @param group Group to check
+     */
+    isMemberOf(group: string): boolean;
+
+    /**
+     * Saves a user preference value to the database.
+     * @param name The preference to save.
+     * @param value The preference value.
+     */
+    savePreference(name: string, value: string): void;
+}
+
 declare var gs: GlideSystem;
 
 declare class GlideSystem
@@ -219,7 +299,7 @@ declare class GlideSystem
     /**
      *Does not have an constructor. available via global variable: gs
      */
-    constructor() { }
+    constructor();
     /**
      * Adds an error message for the current session.
      * @param message 
@@ -250,54 +330,64 @@ declare class GlideSystem
 
     /**
      * Returns the date and time for the beginning of last week in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     beginningOfLastWeek(): string;
 
     /**
      * Returns the date and time for the beginning of next month in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     beginningOfNextMonth(): string;
 
     /**
      * Returns the date and time for the beginning of next week in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     beginningOfNextWeek(): string;
 
     /**
      * Returns the date and time for the beginning of next year in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     beginningOfNextYear(): string;
 
     /**
      * Returns the date and time for the beginning of this month in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     beginningOfThisMonth(): string;
 
     /**
      * Returns the date and time for the beginning of this quarter in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     beginningOfThisQuarter(): string;
 
     /**
      * Returns the date and time for the beginning of this week in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     beginningOfThisWeek(): string;
 
     /**
      * Returns the date and time for the beginning of this year in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     beginningOfThisYear(): string;
 
     /**
      * Generates a date and time for the specified date in GMT.
+     * 
+     * format yyyy-mm-dd hh:mm:ss
      * @param date Format: yyyy-mm-dd
      * @param range start, end, or a time in the 24 hour format hh:mm:ss.
      */
@@ -305,6 +395,7 @@ declare class GlideSystem
 
     /**
      * Returns the date and time for a specified number of days ago.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      * @param days Integer number of days
      */
@@ -312,6 +403,7 @@ declare class GlideSystem
 
     /**
      * Returns the date and time for the end of the day a specified number of days ago.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      * @param days Integer number of days
      */
@@ -319,6 +411,7 @@ declare class GlideSystem
 
     /**
      * Returns the date and time for the beginning of the day a specified number of days ago.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      * @param days Integer number of days
      */
@@ -337,60 +430,70 @@ declare class GlideSystem
 
     /**
      * Returns the date and time for the end of last month in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     endOfLastMonth(): string;
 
     /**
      * Returns the date and time for the end of last week in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     endOfLastWeek(): string;
 
     /**
      * Returns the date and time for the end of last year in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     endOfLastYear(): string;
 
     /**
      * Returns the date and time for the end of next month in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     endOfNextMonth(): string;
 
     /**
      * Returns the date and time for the end of next week in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     endOfNextWeek(): string;
 
     /**
      * Returns the date and time for the end of next year in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     endOfNextYear(): string;
 
     /**
      * Returns the date and time for the end of this month in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     endOfThisMonth(): string;
 
     /**
      * endOfThisQuarter()
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     endOfThisQuarter(): string;
 
     /**
      * Returns the date and time for the end of this week in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     endOfThisWeek(): string;
 
     /**
      * Returns the date and time for the end of this year in GMT.
+     * 
      * format yyyy-mm-dd hh:mm:ss
      */
     endOfThisYear(): string;
@@ -433,6 +536,296 @@ declare class GlideSystem
      * @returns the sysID of the scheduled job. Returns null if the job is global.
      */
     executeNow(job: GlideRecord): string;
+
+    /**
+     * Generates a GUID that can be used when a unique identifier is required.
+     */
+    generateGUID(): string;
+
+    /**
+     * Gets the caller scope name; returns null if there is no caller.
+     */
+    getCallerScopeName(): string;
+
+    /**
+     * Gets a string representing the cache version for a CSS file.
+     */
+    getCssCacheVersionString(): string
+
+    /**
+     * Gets the ID of the current application as set using the Application Picker.
+     */
+    getCurrentApplicationId(): string;
+
+    /**
+     * Gets the name of the current scope.
+     */
+    getCurrentScopeName(): string;
+
+    /**
+     * Returns the list of error messages for the session that were added by addErrorMessage().
+     */
+    getErrorMessages(): string;
+
+    /**
+     * Retrieves a message from UI messages with HTML special characters replaced with escape sequences, for example, & becomes &amp;.
+     * @param id The ID of the message.
+     * @param args (Optional) a list of strings or other values defined by java.text.MessageFormat, which allows you to produce language-neutral messages for display to users.
+     */
+    getEscapedMessage(id: string, args?: Array): string;
+
+    /**
+     * Retrieves a message from UI messages.
+     * @param id The ID of the message.
+     * @param args a list of strings or other values defined by java.text.MessageFormat, which allows you to produce language-neutral messages for display to users.
+     */
+    getMessage(id: string, args?: Array): string;
+
+    /**
+     * Gets the value of a Glide property. If the property is not found, returns an alternate value.
+     * @param key The key for the property whose value should be returned.
+     * @param alt (Optional) Alternate object to return if the property is not found.
+     */
+    getProperty(key: string, alt?: object): string;
+
+    /**
+     * Gets a reference to the current Glide session.
+     */
+    getSession(): string;
+
+    /**
+     * Retrieves the GlideSession session ID.
+     */
+    getSessionID(): string;
+
+    /**
+     * DEPRECATED
+     * 
+     * This method is no longer available. Instead, use gs.getSession().getSessionToken().
+     */
+    getSessionToken(): string;
+
+    /**
+     * Returns the name of the time zone associated with the current user.
+     */
+    getTimeZoneName(): string;
+
+    /**
+     * Gets the current URI for the session.
+     */
+    getUrlOnStack(): string;
+
+    /**
+     * Returns a reference to the scoped GlideUser object for the current user.
+     */
+    getUser(): GlideUser;
+
+    /**
+     * Gets the display name of the current user.
+     */
+    getUserDisplayName(): string;
+
+    /**
+     * Gets the sys_id of the current user.
+     */
+    getUserID(): string;
+
+    /**
+     * Gets the user name, or user id, of the current user.
+     */
+    getUserName(): string;
+
+    /**
+     * Determines if the current user has the specified role.
+     * 
+     * always returns true for users with the admin role.
+     * @param role The role to check.
+     */
+    hasRole(role: string): boolean;
+
+    /**
+     * Returns the date and time for a specified number of hours ago.
+     * 
+     * format yyyy-mm-dd hh:mm:ss
+     * @param hours Integer number of hours
+     */
+    hoursAgo(hours: number): string;
+
+    /**
+     * Returns the date and time for the end of the hour a specified number of hours ago.
+     * 
+     * format yyyy-mm-dd hh:mm:ss
+     * @param hours Integer number of hours
+     */
+    hoursAgoEnd(hours: number): string;
+
+    /**
+     * Returns the date and time for the start of the hour a specified number of hours ago.
+     * 
+     * format yyyy-mm-dd hh:mm:ss
+     * @param hours Integer number of hours 
+     */
+    hoursAgoStart(hours: number): string;
+
+    /**
+     * Provides a safe way to call from the sandbox, allowing only trusted scripts to be included.
+     * @param name 	The name of the script to include.
+     */
+    include(name: string): boolean;
+
+    /**
+     * Writes an info message to the system log.
+     * @param message The log message with place holders for any variable arguments.
+     * @param parm1 (Optional) First variable argument.
+     * @param parm2 (Optional) Second variable argument.
+     * @param parm3 (Optional) Third variable argument.
+     * @param parm4 (Optional) Fourth variable argument.
+     * @param parm5 (Optional) Fifth variable argument.
+     */
+    info(message: string, parm1?: object, parm2?: object, parm3?: object, parm4?: object, parm5?: object): void;
+
+    /**
+     * Determines if debugging is active for a specific scope.
+     */
+    isDebugging(): boolean;
+
+    /**
+     * Checks if the current session is interactive.
+     * An example of an interactive session is when a user logs in normally.
+     */
+    isInteractive(): boolean;
+
+    /**
+     * Determines if the current user is currently logged in.
+     */
+    isLoggedIn(): boolean;
+
+    /**
+     * You can determine if a request comes from a mobile device.
+     * 
+     * This method can be used in UI action conditions and business rules.
+     */
+    isMobile(): boolean;
+
+    /**
+     * Returns the date and time for the end of the minute a specified number of minutes ago.
+     * 
+     * format yyyy-mm-dd hh:mm:ss
+     * @param minutes Integer number of minutes 
+     */
+    minutesAgoEnd(minutes: number): string;
+
+    /**
+     * Returns the date and time for the start of the minute a specified number of minutes ago.
+     * 
+     * format yyyy-mm-dd hh:mm:ss
+     * @param minutes Integer number of hours 
+     */
+    minutesAgoStart(minutes: number): string;
+
+    /**
+     * Returns the date and time for a specified number of months ago.
+     * 
+     * format yyyy-mm-dd hh:mm:ss
+     * @param months Integer number of months
+     */
+    monthsAgo(months: number): string;
+
+    /**
+     * Returns the date and time for the start of the month a specified number of months ago.
+     * 
+     * format yyyy-mm-dd hh:mm:ss
+     * @param months Integer number of months
+     */
+    monthsAgoStart(months: number): string;
+
+    /**
+     * Queries an object and returns true if the object is null, undefined, or contains an empty string.
+     * @param o The object to be checked.
+     */
+    nil(o: object): boolean;
+
+    /**
+     * Returns the date and time for the last day of the quarter for a specified number of quarters ago.
+     * 
+     * format yyyy-mm-dd hh:mm:ss
+     * @param quarters 	Integer number of quarters
+     */
+    quartersAgoEnd(quarters: number): string;
+
+    /**
+     * Returns the date and time for the first day of the quarter for a specified number of quarters ago.
+     * 
+     * format yyyy-mm-dd hh:mm:ss
+     * @param quarters 	Integer number of quarters
+     */
+    quartersAgoStart(quarters: number): string;
+
+    /**
+     * Sets the specified key to the specified value if the property is within the script's scope.
+     * @param key The key for the property to be set.
+     * @param value The value of the property to be set
+     * @param description A description of the property.
+     */
+    setProperty(key: string, value: string, description: string): void;
+
+    /**
+     * Sets the redirect URI for this transaction, which then determines the next page the user will see.
+     * @param o URI object or URI string to set as the redirect
+     */
+    setRedirect(o: string | object): void;
+
+    /**
+     * Determines if a database table exists.
+     * @param name Name of the table to check for existence.
+     */
+    tableExists(name: string): boolean;
+
+    /**
+     * Replaces UTF-8 encoded characters with ASCII characters.
+     * @param url A string with UTF-8 percent (%) encoded characters.
+     */
+    urlDecode(url: string): string;
+
+    /**
+     * Encodes non-ASCII characters, unsafe ASCII characters, and spaces so the returned string can be used on the Internet.
+     * Uses UTF-8 encoding. Uses percent (%) encoding.
+     * @param url The string to be encoded.
+     */
+    urlEncode(url: string): string;
+
+    /**
+     * Writes a warning message to the system log.
+     * @param message The log message with place holders for any variable arguments.
+     * @param parm1 (Optional) First variable argument.
+     * @param parm2 (Optional) Second variable argument.
+     * @param parm3 (Optional) Third variable argument.
+     * @param parm4 (Optional) Fourth variable argument.
+     * @param parm5 (Optional) Fifth variable argument.
+     */
+    warn(message: string, parm1?: object, parm2?: object, parm3?: object, parm4?: object, parm5?: object): void;
+
+    /**
+     * Takes an XML string and returns a JSON object.
+     * @param xmlString The XML string to be converted.
+     */
+    xmlToJSON(xmlString: string): object;
+
+    /**
+     * Returns a date and time for a certain number of years ago.
+     * 
+     * format yyyy-mm-dd hh:mm:ss
+     * @param years An integer number of years
+     */
+    yearsAgo(years: number): string;
+
+    /**
+     * Returns yesterday's time (24 hours ago).
+     * 
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    yesterday(): string;
+
 }
 
 declare namespace sn_ws
