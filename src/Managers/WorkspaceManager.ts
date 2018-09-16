@@ -218,7 +218,7 @@ export class WorkspaceManager
             let path = this.GetPathWorkspace();
             if (path)
             {
-                let fileNameSrvApi = "ServerSideAPI.d.ts";
+                let fileNameSrvApi = "serverSideAPI.d.ts";
                 // let fileNameCliApi = "ClientSideApi.d.ts";
                 let fileNameJsConf = "jsconfig.json";
 

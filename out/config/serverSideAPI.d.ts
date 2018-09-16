@@ -1,4 +1,3 @@
-import { LookupOneOptions } from "dns";
 
 declare class GlideRecord
 {
@@ -99,13 +98,10 @@ declare class GlideRecord
     orderBy(name: string): void;
     /**Specifies a decending orderBy column. */
     orderByDesc(name: string): void;
-
-    /**Runs the query against the table based on the filters specified by addQuery, addEncodedQuery, etc. */
-    query(): void;
     /**Runs the query against the table based on the filters specified by addQuery, addEncodedQuery, etc.
      * If name/value pair is specified, "name=value" condition is added to the query.
      */
-    query(field: object, value: object): void;
+    query(field?: object, value?: object): void;
     /**Sets a flag to indicate if the next database action (insert, update, delete) is to be aborted. This is often used in business rules.
      * Use in an onBefore business rule to prevent the database action from being done.
      * The business rule continues to run after setAbortAction() is called. Calling setAbortAction() does not stop subsequent business rules from executing.
@@ -214,6 +210,229 @@ declare class GlideQueryCondition
     addCondition(name: string, operation: string, value: object): GlideQueryCondition;
     /**Appends a 2-or-3 parameter OR condition to an existing GlideQueryCondition. */
     addOrCondition(name: string, operation: string, value: object): GlideQueryCondition;
+}
+
+declare var gs: GlideSystem;
+
+declare class GlideSystem
+{
+    /**
+     *Does not have an constructor. available via global variable: gs
+     */
+    constructor() { }
+    /**
+     * Adds an error message for the current session.
+     * @param message 
+     */
+    addErrorMessage(message: object): void;
+    /**
+     * Adds an info message for the current session. This method is not supported for asynchronous business rules
+     * @param message 
+     */
+    addInfoMessage(message: object): void;
+
+    /**
+     * Returns an ASCII string from the specified base64 string.
+     * @param source A base64 encoded string.
+     */
+    base64Decode(source: String): string;
+
+    /**
+     * Creates a base64 string from the specified string.
+     * @param source The string to be encoded.
+     */
+    base64Encode(source: string): string;
+
+    /**
+     * Returns the date and time for the beginning of last month in GMT. in the format yyyy-mm-dd hh:mm:ss
+     */
+    beginningOfLastMonth(): string;
+
+    /**
+     * Returns the date and time for the beginning of last week in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    beginningOfLastWeek(): string;
+
+    /**
+     * Returns the date and time for the beginning of next month in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    beginningOfNextMonth(): string;
+
+    /**
+     * Returns the date and time for the beginning of next week in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    beginningOfNextWeek(): string;
+
+    /**
+     * Returns the date and time for the beginning of next year in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    beginningOfNextYear(): string;
+
+    /**
+     * Returns the date and time for the beginning of this month in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    beginningOfThisMonth(): string;
+
+    /**
+     * Returns the date and time for the beginning of this quarter in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    beginningOfThisQuarter(): string;
+
+    /**
+     * Returns the date and time for the beginning of this week in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    beginningOfThisWeek(): string;
+
+    /**
+     * Returns the date and time for the beginning of this year in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    beginningOfThisYear(): string;
+
+    /**
+     * Generates a date and time for the specified date in GMT.
+     * @param date Format: yyyy-mm-dd
+     * @param range start, end, or a time in the 24 hour format hh:mm:ss.
+     */
+    dateGenerate(date: string, range: string): string;
+
+    /**
+     * Returns the date and time for a specified number of days ago.
+     * format yyyy-mm-dd hh:mm:ss
+     * @param days Integer number of days
+     */
+    daysAgo(days: number): string;
+
+    /**
+     * Returns the date and time for the end of the day a specified number of days ago.
+     * format yyyy-mm-dd hh:mm:ss
+     * @param days Integer number of days
+     */
+    daysAgoEnd(days: string): string
+
+    /**
+     * Returns the date and time for the beginning of the day a specified number of days ago.
+     * format yyyy-mm-dd hh:mm:ss
+     * @param days Integer number of days
+     */
+    daysAgoStart(days: number): string;
+
+    /**
+     * Writes a debug message to the system log.
+     * @param message The log message with place holders for any variable arguments.
+     * @param parm1 (Optional) First variable argument.
+     * @param parm2 (Optional) Second variable argument.
+     * @param parm3 (Optional) Third variable argument.
+     * @param parm4 (Optional) Fourth variable argument.
+     * @param parm5 (Optional) Fifth variable argument.
+     */
+    debug(message: string, parm1?: object, parm2?: object, parm3?: object, parm4?: object, parm5?: object): void;
+
+    /**
+     * Returns the date and time for the end of last month in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    endOfLastMonth(): string;
+
+    /**
+     * Returns the date and time for the end of last week in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    endOfLastWeek(): string;
+
+    /**
+     * Returns the date and time for the end of last year in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    endOfLastYear(): string;
+
+    /**
+     * Returns the date and time for the end of next month in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    endOfNextMonth(): string;
+
+    /**
+     * Returns the date and time for the end of next week in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    endOfNextWeek(): string;
+
+    /**
+     * Returns the date and time for the end of next year in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    endOfNextYear(): string;
+
+    /**
+     * Returns the date and time for the end of this month in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    endOfThisMonth(): string;
+
+    /**
+     * endOfThisQuarter()
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    endOfThisQuarter(): string;
+
+    /**
+     * Returns the date and time for the end of this week in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    endOfThisWeek(): string;
+
+    /**
+     * Returns the date and time for the end of this year in GMT.
+     * format yyyy-mm-dd hh:mm:ss
+     */
+    endOfThisYear(): string;
+
+    /**
+     * Writes an error message to the system log.
+     * This method accepts up to five variable arguments (varargs) in the message using the Java MessageFormat placeholder replacement pattern.
+     * @param message The log message with place holders for any variable arguments.
+     * @param parm1 (Optional) First variable argument.
+     * @param parm2 (Optional) Second variable argument.
+     * @param parm3 (Optional) Third variable argument.
+     * @param parm4 (Optional) Fourth variable argument.
+     * @param parm5 (Optional) Fifth variable argument.
+     */
+    error(message: string, parm1?: object, parm2?: object, parm3?: object, parm4?: object, parm5?: object): void
+
+    /**
+     * Queues an event for the event manager.
+     * @param name Name of the event being queued.
+     * @param instance GlideRecord object, such as "current".
+     * @param parm1 Saved with the instance if specified.
+     * @param parm2 Saved with the instance if specified.
+     * @param queue Name of the queue.
+     */
+    eventQueue(name: string, instance: object, parm1?: string, parm2?: string, queue?: string): void;
+
+    /**
+     * Queues an event for the event manager at a specified date and time.
+     * @param name 
+     * @param instance 
+     * @param parm1 
+     * @param parm2 
+     * @param expiration 
+     */
+    eventQueueScheduled(name: string, instance: object, parm1: string, parm2: string, expiration: object): void;
+
+    /**
+     * Executes a job for a scoped application.
+     * @param job 	The job to be run.
+     * @returns the sysID of the scheduled job. Returns null if the job is global.
+     */
+    executeNow(job: GlideRecord): string;
 }
 
 declare namespace sn_ws
@@ -482,220 +701,4 @@ declare namespace sn_ws
     }
     //Not documentet
     class GlideHTTPHeader { }
-}
-declare namespace gs
-{
-    /**
-     * Adds an error message for the current session.
-     * @param message 
-     */
-    function addErrorMessage(message: object): void;
-    /**
-     * Adds an info message for the current session. This method is not supported for asynchronous business rules
-     * @param message 
-     */
-    function addInfoMessage(message: object): void;
-
-    /**
-     * Returns an ASCII string from the specified base64 string.
-     * @param source A base64 encoded string.
-     */
-    function base64Decode(source: String): string;
-
-    /**
-     * Creates a base64 string from the specified string.
-     * @param source The string to be encoded.
-     */
-    function base64Encode(source: string): string;
-
-    /**
-     * Returns the date and time for the beginning of last month in GMT. in the format yyyy-mm-dd hh:mm:ss
-     */
-    function beginningOfLastMonth(): string;
-
-    /**
-     * Returns the date and time for the beginning of last week in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function beginningOfLastWeek(): string;
-
-    /**
-     * Returns the date and time for the beginning of next month in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function beginningOfNextMonth(): string;
-
-    /**
-     * Returns the date and time for the beginning of next week in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function beginningOfNextWeek(): string;
-
-    /**
-     * Returns the date and time for the beginning of next year in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function beginningOfNextYear(): string;
-
-    /**
-     * Returns the date and time for the beginning of this month in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function beginningOfThisMonth(): string;
-
-    /**
-     * Returns the date and time for the beginning of this quarter in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function beginningOfThisQuarter(): string;
-
-    /**
-     * Returns the date and time for the beginning of this week in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function beginningOfThisWeek(): string;
-
-    /**
-     * Returns the date and time for the beginning of this year in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function beginningOfThisYear(): string;
-
-    /**
-     * Generates a date and time for the specified date in GMT.
-     * @param date Format: yyyy-mm-dd
-     * @param range start, end, or a time in the 24 hour format hh:mm:ss.
-     */
-    function dateGenerate(date: string, range: string): string;
-
-    /**
-     * Returns the date and time for a specified number of days ago.
-     * format yyyy-mm-dd hh:mm:ss
-     * @param days Integer number of days
-     */
-    function daysAgo(days: number): string;
-
-    /**
-     * Returns the date and time for the end of the day a specified number of days ago.
-     * format yyyy-mm-dd hh:mm:ss
-     * @param days Integer number of days
-     */
-    function daysAgoEnd(days: string): string
-
-    /**
-     * Returns the date and time for the beginning of the day a specified number of days ago.
-     * format yyyy-mm-dd hh:mm:ss
-     * @param days Integer number of days
-     */
-    function daysAgoStart(days: number): string;
-
-    /**
-     * Writes a debug message to the system log.
-     * @param message The log message with place holders for any variable arguments.
-     * @param parm1 (Optional) First variable argument.
-     * @param parm2 (Optional) Second variable argument.
-     * @param parm3 (Optional) Third variable argument.
-     * @param parm4 (Optional) Fourth variable argument.
-     * @param parm5 (Optional) Fifth variable argument.
-     */
-    function debug(message: string, parm1?: object, parm2?: object, parm3?: object, parm4?: object, parm5?: object): void;
-
-    /**
-     * Returns the date and time for the end of last month in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function endOfLastMonth(): string;
-
-    /**
-     * Returns the date and time for the end of last week in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function endOfLastWeek(): string;
-
-    /**
-     * Returns the date and time for the end of last year in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function endOfLastYear(): string;
-
-    /**
-     * Returns the date and time for the end of next month in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function endOfNextMonth(): string;
-
-    /**
-     * Returns the date and time for the end of next week in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function endOfNextWeek(): string;
-
-    /**
-     * Returns the date and time for the end of next year in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function endOfNextYear(): string;
-
-    /**
-     * Returns the date and time for the end of this month in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function endOfThisMonth(): string;
-
-    /**
-     * endOfThisQuarter()
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function endOfThisQuarter(): string;
-
-    /**
-     * Returns the date and time for the end of this week in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function endOfThisWeek(): string;
-
-    /**
-     * Returns the date and time for the end of this year in GMT.
-     * format yyyy-mm-dd hh:mm:ss
-     */
-    function endOfThisYear(): string;
-
-    /**
-     * Writes an error message to the system log.
-     * This method accepts up to five variable arguments (varargs) in the message using the Java MessageFormat placeholder replacement pattern.
-     * @param message The log message with place holders for any variable arguments.
-     * @param parm1 (Optional) First variable argument.
-     * @param parm2 (Optional) Second variable argument.
-     * @param parm3 (Optional) Third variable argument.
-     * @param parm4 (Optional) Fourth variable argument.
-     * @param parm5 (Optional) Fifth variable argument.
-     */
-    function error(message: string, parm1?: object, parm2?: object, parm3?: object, parm4?: object, parm5?: object): void
-
-    /**
-     * Queues an event for the event manager.
-     * @param name Name of the event being queued.
-     * @param instance GlideRecord object, such as "current".
-     * @param parm1 Saved with the instance if specified.
-     * @param parm2 Saved with the instance if specified.
-     * @param queue Name of the queue.
-     */
-    function eventQueue(name: string, instance: object, parm1?: string, parm2?: string, queue?: string): void;
-
-    /**
-     * Queues an event for the event manager at a specified date and time.
-     * @param name 
-     * @param instance 
-     * @param parm1 
-     * @param parm2 
-     * @param expiration 
-     */
-    function eventQueueScheduled(name: string, instance: object, parm1: string, parm2: string, expiration: object): void;
-
-    /**
-     * Executes a job for a scoped application.
-     * @param job 	The job to be run.
-     * @returns the sysID of the scheduled job. Returns null if the job is global.
-     */
-    function executeNow(job: GlideRecord): string;
 }
