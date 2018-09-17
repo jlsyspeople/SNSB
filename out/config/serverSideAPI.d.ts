@@ -647,14 +647,14 @@ declare class GlideSystem
      * @param id The ID of the message.
      * @param args (Optional) a list of strings or other values defined by java.text.MessageFormat, which allows you to produce language-neutral messages for display to users.
      */
-    getEscapedMessage(id: string, args?: Array): string;
+    getEscapedMessage(id: string, args?: Array<string>): string;
 
     /**
      * Retrieves a message from UI messages.
      * @param id The ID of the message.
      * @param args a list of strings or other values defined by java.text.MessageFormat, which allows you to produce language-neutral messages for display to users.
      */
-    getMessage(id: string, args?: Array): string;
+    getMessage(id: string, args?: Array<string>): string;
 
     /**
      * Gets the value of a Glide property. If the property is not found, returns an alternate value.
@@ -1165,7 +1165,7 @@ declare namespace sn_ws
          * This method overrides the property glide.rest.outbound.ecc_response.timeout for this REST response.
          * @param timeoutSecs The amount of time, in seconds, to wait for this response.
          */
-        waitForResponse(timeoutSecs: number)
+        waitForResponse(timeoutSecs: number): void;
     }
     //Not documentet
     class GlideHTTPHeader { }
